@@ -1,0 +1,1272 @@
+<!doctype html>
+<html lang="zh-Hans">
+	<head>
+		<title>差分对雷达</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<style>
+			:root {
+				color-scheme: light;
+				--bg: #f6f7fb;
+				--card: #ffffff;
+				--text: #0f172a;
+				--muted: #64748b;
+				--primary: #2563eb;
+				--primary-contrast: #ffffff;
+				--border: #e2e8f0;
+				--shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+				--success: #16a34a;
+				--warning: #f59e0b;
+				--danger: #ef4444;
+				--chip: #f1f5f9;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			body {
+				margin: 0;
+				height: 100vh;
+				font-family:
+					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB',
+					'Microsoft YaHei', sans-serif;
+				background: var(--bg);
+				color: var(--text);
+				overflow: hidden;
+			}
+
+			.app {
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+				padding: 20px 24px 28px;
+				gap: 16px;
+			}
+
+			.titlebar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding: 14px 16px;
+				background: var(--card);
+				border-radius: 14px;
+				box-shadow: var(--shadow);
+			}
+
+			.titlebar-left {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.titlebar-right {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				color: var(--muted);
+				font-weight: 600;
+				font-size: 13px;
+			}
+
+			.version-badge {
+				padding: 4px 10px;
+				border-radius: 999px;
+				background: #f1f5f9;
+			}
+
+			.window-controls {
+				display: flex;
+				gap: 8px;
+				align-items: center;
+			}
+
+			.window-dot {
+				width: 12px;
+				height: 12px;
+				border-radius: 999px;
+				border: 1px solid rgba(15, 23, 42, 0.08);
+				cursor: pointer;
+			}
+
+			.window-dot.close {
+				background: #ff5f56;
+			}
+
+			.window-dot.minimize {
+				background: #ffbd2e;
+			}
+
+			.window-dot.maximize {
+				background: #27c93f;
+			}
+
+			.title {
+				font-size: 16px;
+				font-weight: 600;
+			}
+
+			button {
+				border: none;
+				border-radius: 10px;
+				padding: 10px 16px;
+				font-size: 14px;
+				font-weight: 600;
+				cursor: pointer;
+				background: #eef2ff;
+				color: #334155;
+				transition: all 0.2s ease;
+			}
+
+			button:hover {
+				transform: translateY(-1px);
+			}
+
+			button.primary {
+				background: var(--primary);
+				color: var(--primary-contrast);
+				box-shadow: 0 10px 18px rgba(37, 99, 235, 0.22);
+			}
+
+			.section {
+				background: var(--card);
+				border-radius: 14px;
+				padding: 12px 16px;
+				box-shadow: var(--shadow);
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.section-title {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				font-weight: 600;
+				font-size: 14px;
+				color: var(--muted);
+			}
+
+			.section-title-left {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.section-title-right {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				color: var(--text);
+			}
+
+			input[type='checkbox'] {
+				accent-color: var(--primary);
+			}
+
+			input[type='checkbox']:indeterminate {
+				accent-color: var(--warning);
+			}
+
+			.select-all {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-weight: 600;
+				color: var(--text);
+				cursor: pointer;
+			}
+
+			.length-toggle {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-weight: 600;
+				color: var(--text);
+				cursor: pointer;
+			}
+
+			.rules-layout {
+				display: flex;
+				gap: 16px;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.rule-chips {
+				display: flex;
+				gap: 8px;
+				flex-wrap: wrap;
+				flex: 1;
+				min-width: 0;
+			}
+
+			.chip {
+				padding: 6px 26px 6px 10px;
+				border-radius: 999px;
+				background: var(--chip);
+				font-size: 13px;
+				font-weight: 600;
+				color: #475569;
+				position: relative;
+				display: inline-flex;
+				align-items: center;
+			}
+
+			.chip .chip-remove {
+				position: absolute;
+				right: 6px;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 16px;
+				height: 16px;
+				border-radius: 999px;
+				background: rgba(15, 23, 42, 0.12);
+				color: #475569;
+				font-size: 12px;
+				display: none;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+			}
+
+			.chip:hover .chip-remove {
+				display: inline-flex;
+			}
+
+			.rule-add {
+				display: flex;
+				gap: 8px;
+				align-items: center;
+				background: #f8fafc;
+				padding: 8px 10px;
+				border-radius: 12px;
+				border: 1px solid var(--border);
+			}
+
+			.rule-add input {
+				width: 40px;
+				height: 32px;
+				border-radius: 8px;
+				border: 1px solid var(--border);
+				font-size: 15px;
+				text-align: center;
+				font-weight: 600;
+				background: #ffffff;
+			}
+
+			.rule-add span {
+				color: var(--muted);
+				font-weight: 600;
+			}
+
+			.rule-add button {
+				padding: 8px 12px;
+			}
+
+			.results {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				flex: 1;
+				min-height: 0;
+			}
+
+			.result-list {
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+				flex: 1;
+				min-height: 0;
+				overflow: auto;
+				padding-right: 4px;
+			}
+
+			.group {
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 10px;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			.table {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 13px;
+			}
+
+			.table thead th {
+				text-align: left;
+				padding: 6px 8px;
+				background: #f1f5f9;
+				color: #475569;
+				font-weight: 600;
+				border-bottom: 1px solid var(--border);
+				position: sticky;
+				top: 0;
+				z-index: 2;
+			}
+
+			.table tbody td {
+				padding: 6px 8px;
+				border-bottom: 1px solid #e2e8f0;
+				vertical-align: middle;
+			}
+
+			.table tbody tr:hover {
+				background: #f8fafc;
+			}
+
+			.cell-name {
+				font-weight: 600;
+			}
+
+			.cell-muted {
+				color: var(--muted);
+			}
+
+			.name-input {
+				width: 100%;
+				border: 1px solid transparent;
+				background: transparent;
+				border-radius: 8px;
+				padding: 4px 6px;
+				font-size: 13px;
+				font-weight: 600;
+				color: var(--text);
+			}
+
+			.name-input:focus {
+				outline: none;
+				border-color: var(--primary);
+				background: #ffffff;
+				box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+			}
+
+			.net-link {
+				border: none;
+				background: transparent;
+				padding: 0;
+				color: var(--primary);
+				font-weight: 600;
+				cursor: pointer;
+				font-size: 13px;
+			}
+
+			.net-cell {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+
+			.net-length {
+				font-size: 11px;
+				color: var(--muted);
+			}
+
+			.header-meta {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 8px;
+			}
+
+			.tag {
+				padding: 4px 8px;
+				border-radius: 8px;
+				font-size: 12px;
+				font-weight: 600;
+				background: #e2e8f0;
+				color: #475569;
+			}
+
+			.tag.positive {
+				background: rgba(37, 99, 235, 0.12);
+				color: var(--primary);
+			}
+
+			.tag.negative {
+				background: rgba(239, 68, 68, 0.12);
+				color: var(--danger);
+			}
+
+			.tag.exist {
+				background: rgba(245, 158, 11, 0.16);
+				color: var(--warning);
+			}
+
+			.footer {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				background: var(--card);
+				border-radius: 14px;
+				padding: 12px 16px;
+				box-shadow: var(--shadow);
+				gap: 16px;
+			}
+
+			.status {
+				color: var(--muted);
+				font-size: 13px;
+			}
+
+			.actions {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.loading {
+				position: fixed;
+				inset: 0;
+				display: none;
+				align-items: center;
+				justify-content: center;
+				background: rgba(15, 23, 42, 0.2);
+				backdrop-filter: blur(6px);
+				z-index: 999;
+			}
+
+			.loading.active {
+				display: flex;
+			}
+
+			.loading-card {
+				background: var(--card);
+				padding: 22px 26px;
+				border-radius: 14px;
+				box-shadow: var(--shadow);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 12px;
+			}
+
+			.spinner {
+				width: 36px;
+				height: 36px;
+				border-radius: 999px;
+				border: 4px solid #e2e8f0;
+				border-top-color: var(--primary);
+				animation: spin 0.9s linear infinite;
+			}
+
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="app">
+			<header class="titlebar">
+				<div class="titlebar-left">
+					<div class="window-controls">
+						<div class="window-dot close" data-action="close"></div>
+						<div class="window-dot minimize" data-action="minimize"></div>
+						<div class="window-dot maximize" data-action="maximize"></div>
+					</div>
+					<div class="title">差分对雷达</div>
+				</div>
+				<div class="titlebar-right">
+					<span class="version-badge" id="versionText"></span>
+				</div>
+			</header>
+
+			<section class="section">
+				<div class="section-title">
+					<span>识别规则</span>
+					<span id="ruleHint">默认规则已启用</span>
+				</div>
+				<div class="rules-layout">
+					<div class="rule-chips" id="ruleChips"></div>
+					<div class="rule-add">
+						<input id="ruleA" maxlength="1" placeholder="A" />
+						<span>↔</span>
+						<input id="ruleB" maxlength="1" placeholder="B" />
+						<button id="addRuleBtn">添加规则</button>
+					</div>
+				</div>
+			</section>
+
+			<section class="section results">
+				<div class="section-title">
+					<div class="section-title-left">
+						<span>识别结果</span>
+						<label class="select-all"><input type="checkbox" id="selectAll" checked /> 全选</label>
+					</div>
+					<div class="section-title-right">
+						<span id="summary"></span>
+						<label class="length-toggle"><input type="checkbox" id="toggleLength" /> 长度</label>
+					</div>
+				</div>
+				<div class="result-list" id="resultList"></div>
+			</section>
+
+			<footer class="footer">
+				<div class="status" id="statusText">等待识别</div>
+				<div class="actions">
+					<button id="rescanBtn">重新识别</button>
+					<button id="exportBtn">导出CSV</button>
+					<button class="primary" id="applyBtnBottom">写入PCB</button>
+				</div>
+			</footer>
+		</div>
+
+		<div class="loading" id="loading">
+			<div class="loading-card">
+				<div class="spinner"></div>
+				<div id="loadingText">正在识别差分对</div>
+			</div>
+		</div>
+
+		<script>
+			const STORAGE_KEY = 'diffPairRules';
+			const APP_VERSION = '26.1.7';
+			const DEFAULT_RULES = [
+				{ a: 'P', b: 'N', custom: false },
+				{ a: '+', b: '-', custom: false },
+				{ a: 'H', b: 'L', custom: false },
+				{ a: 'A', b: 'B', custom: false },
+			];
+
+			const state = {
+				defaultRules: DEFAULT_RULES,
+				customRules: [],
+				rules: [],
+				pairs: [],
+				groups: [],
+				existingMap: new Map(),
+				netLengthMap: new Map(),
+				showNetLength: false,
+				highlightedNets: new Set(),
+				selectedPairIds: new Set(),
+			};
+
+			const elements = {
+				ruleChips: document.getElementById('ruleChips'),
+				ruleA: document.getElementById('ruleA'),
+				ruleB: document.getElementById('ruleB'),
+				addRuleBtn: document.getElementById('addRuleBtn'),
+				rescanBtn: document.getElementById('rescanBtn'),
+				exportBtn: document.getElementById('exportBtn'),
+				applyBtnBottom: document.getElementById('applyBtnBottom'),
+				resultList: document.getElementById('resultList'),
+				summary: document.getElementById('summary'),
+				statusText: document.getElementById('statusText'),
+				selectAll: document.getElementById('selectAll'),
+				toggleLength: document.getElementById('toggleLength'),
+				loading: document.getElementById('loading'),
+				loadingText: document.getElementById('loadingText'),
+				versionText: document.getElementById('versionText'),
+			};
+
+			if (elements.versionText) {
+				elements.versionText.textContent = `v${APP_VERSION}`;
+			}
+
+			const isIFrameContext = Boolean(window.parent && window.parent !== window && window.parent.eda);
+			const windowControls = document.querySelector('.window-controls');
+			if (!isIFrameContext && windowControls) {
+				windowControls.style.display = 'none';
+			}
+
+			function getEda() {
+				if (window.eda) {
+					return window.eda;
+				}
+				if (window.parent && window.parent.eda) {
+					return window.parent.eda;
+				}
+				if (window.opener && window.opener.eda) {
+					return window.opener.eda;
+				}
+				return null;
+			}
+
+			function setLoading(active, text) {
+				elements.loading.classList.toggle('active', active);
+				if (text) {
+					elements.loadingText.textContent = text;
+				}
+			}
+
+			function setStatus(text) {
+				elements.statusText.textContent = text;
+			}
+
+			function loadCustomRules() {
+				try {
+					const raw = localStorage.getItem(STORAGE_KEY);
+					if (!raw) return [];
+					const parsed = JSON.parse(raw);
+					if (!Array.isArray(parsed)) return [];
+					return parsed
+						.map((item) => normalizeRule(item.a, item.b))
+						.filter((item) => item)
+						.map((item) => ({ ...item, custom: true }));
+				} catch (error) {
+					return [];
+				}
+			}
+
+			function saveCustomRules() {
+				try {
+					const payload = state.customRules.map((rule) => ({ a: rule.a, b: rule.b }));
+					localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+				} catch (error) {
+					setStatus('规则保存失败');
+				}
+			}
+
+			function refreshRules() {
+				state.rules = [...state.defaultRules, ...state.customRules];
+				renderRules();
+			}
+
+			function renderRules() {
+				elements.ruleChips.innerHTML = '';
+				state.rules.forEach((rule) => {
+					const chip = document.createElement('div');
+					chip.className = 'chip';
+					chip.textContent = `${rule.a}/${rule.b}`;
+					const remove = document.createElement('span');
+					remove.className = 'chip-remove';
+					remove.textContent = '×';
+					remove.addEventListener('click', (event) => {
+						event.stopPropagation();
+						if (rule.custom) {
+							state.customRules = state.customRules.filter((item) => !(item.a === rule.a && item.b === rule.b));
+							saveCustomRules();
+						} else {
+							state.defaultRules = state.defaultRules.filter((item) => !(item.a === rule.a && item.b === rule.b));
+						}
+						refreshRules();
+						scanPairs();
+					});
+					chip.appendChild(remove);
+					elements.ruleChips.appendChild(chip);
+				});
+			}
+
+			function normalizeRule(a, b) {
+				if (!a || !b) return null;
+				const ra = a.trim();
+				const rb = b.trim();
+				if (!ra || !rb || ra.length !== 1 || rb.length !== 1 || ra === rb) return null;
+				return { a: ra, b: rb };
+			}
+
+			function hasRule(rule) {
+				return state.rules.some((item) => item.a === rule.a && item.b === rule.b);
+			}
+
+			function cleanBaseName(name) {
+				let result = name;
+				while (result.startsWith('_') || result.startsWith('-') || result.startsWith('.') || result.startsWith('/')) {
+					result = result.slice(1);
+				}
+				while (result.endsWith('_') || result.endsWith('-') || result.endsWith('.') || result.endsWith('/')) {
+					result = result.slice(0, -1);
+				}
+				return result || name;
+			}
+
+			function buildExistingMap(existing) {
+				state.existingMap.clear();
+				existing.forEach((pair) => {
+					const forward = `${pair.positiveNet}||${pair.negativeNet}`;
+					const backward = `${pair.negativeNet}||${pair.positiveNet}`;
+					state.existingMap.set(forward, pair.name);
+					state.existingMap.set(backward, pair.name);
+				});
+			}
+
+			function formatLength(length) {
+				if (length === undefined || length === null || Number.isNaN(length)) {
+					return '-';
+				}
+				if (!Number.isFinite(length)) {
+					return '-';
+				}
+				return Number(length).toFixed(2);
+			}
+
+			async function ensureNetLengths(pairs) {
+				if (!state.showNetLength) return;
+				const eda = getEda();
+				if (!eda || !eda.pcb_Net?.getNetLength) return;
+				const pending = new Set();
+				pairs.forEach((pair) => {
+					if (!state.netLengthMap.has(pair.positiveNet)) {
+						pending.add(pair.positiveNet);
+					}
+					if (!state.netLengthMap.has(pair.negativeNet)) {
+						pending.add(pair.negativeNet);
+					}
+				});
+				if (!pending.size) return;
+				const requests = Array.from(pending).map(async (net) => {
+					const length = await eda.pcb_Net.getNetLength(net);
+					state.netLengthMap.set(net, length);
+				});
+				await Promise.all(requests);
+			}
+
+			function generatePairs(nets) {
+				const pairs = [];
+				const used = new Set();
+				const nameCounts = new Map();
+
+				state.rules.forEach((rule) => {
+					const ruleKey = `${rule.a}|${rule.b}`;
+					const index = new Map();
+
+					nets.forEach((net) => {
+						for (let i = 0; i < net.length; i += 1) {
+							const ch = net[i];
+							if (ch === rule.a || ch === rule.b) {
+								const base = `${net.slice(0, i)}*${net.slice(i + 1)}`;
+								const key = `${ruleKey}|${i}|${base}`;
+								if (!index.has(key)) {
+									index.set(key, { a: [], b: [], base });
+								}
+								const bucket = index.get(key);
+								if (ch === rule.a) {
+									bucket.a.push(net);
+								} else {
+									bucket.b.push(net);
+								}
+							}
+						}
+					});
+
+					index.forEach((bucket) => {
+						if (!bucket.a.length || !bucket.b.length) return;
+						bucket.a.forEach((aNet) => {
+							bucket.b.forEach((bNet) => {
+								const pairKey = [aNet, bNet].sort().join('||');
+								if (used.has(pairKey)) return;
+								used.add(pairKey);
+								const baseRaw = bucket.base.replace('*', '');
+								const rawName = cleanBaseName(baseRaw);
+								const count = nameCounts.get(rawName) || 0;
+								const name = count === 0 ? rawName : `${rawName}_${count + 1}`;
+								nameCounts.set(rawName, count + 1);
+								const existingName = state.existingMap.get(`${aNet}||${bNet}`) || '';
+								pairs.push({
+									id: `${ruleKey}|${aNet}|${bNet}`,
+									name,
+									positiveNet: aNet,
+									negativeNet: bNet,
+									groupKey: ruleKey,
+									ruleLabel: `${rule.a}/${rule.b}`,
+									existingName,
+								});
+							});
+						});
+					});
+				});
+
+				return pairs;
+			}
+
+			function buildGroups(pairs) {
+				const groupMap = new Map();
+				pairs.forEach((pair) => {
+					if (!groupMap.has(pair.groupKey)) {
+						groupMap.set(pair.groupKey, { key: pair.groupKey, label: pair.ruleLabel, pairs: [] });
+					}
+					groupMap.get(pair.groupKey).pairs.push(pair);
+				});
+				const ordered = [];
+				state.rules.forEach((rule) => {
+					const key = `${rule.a}|${rule.b}`;
+					if (groupMap.has(key)) {
+						ordered.push(groupMap.get(key));
+					}
+				});
+				return ordered;
+			}
+
+			function setPairSelected(pairId, selected) {
+				if (selected) {
+					state.selectedPairIds.add(pairId);
+				} else {
+					state.selectedPairIds.delete(pairId);
+				}
+			}
+
+			function updateSelectAllState() {
+				if (!state.pairs.length) {
+					elements.selectAll.checked = false;
+					elements.selectAll.indeterminate = false;
+					return;
+				}
+				const selectedCount = state.selectedPairIds.size;
+				if (selectedCount === 0) {
+					elements.selectAll.checked = false;
+					elements.selectAll.indeterminate = false;
+					return;
+				}
+				if (selectedCount === state.pairs.length) {
+					elements.selectAll.checked = true;
+					elements.selectAll.indeterminate = false;
+					return;
+				}
+				elements.selectAll.checked = false;
+				elements.selectAll.indeterminate = true;
+			}
+
+			function updateGroupToggleState(groupKey) {
+				const group = state.groups.find((item) => item.key === groupKey);
+				if (!group) return;
+				const selectedCount = group.pairs.reduce((total, pair) => (state.selectedPairIds.has(pair.id) ? total + 1 : total), 0);
+				const allSelected = selectedCount === group.pairs.length && group.pairs.length > 0;
+				const groupToggle = document.querySelector(`.group-toggle[data-group-key="${groupKey}"]`);
+				if (groupToggle) {
+					groupToggle.checked = allSelected;
+					groupToggle.indeterminate = selectedCount > 0 && selectedCount < group.pairs.length;
+				}
+			}
+
+			function syncSelectionFromDom() {
+				const pairToggles = document.querySelectorAll('.pair-toggle');
+				if (!pairToggles.length) return;
+				const selectedIds = new Set();
+				pairToggles.forEach((toggle) => {
+					if (toggle.checked && toggle.dataset.pairId) {
+						selectedIds.add(toggle.dataset.pairId);
+					}
+				});
+				state.selectedPairIds = selectedIds;
+			}
+
+			function renderResults() {
+				elements.resultList.innerHTML = '';
+				let total = 0;
+				let existCount = 0;
+
+				state.groups.forEach((group) => {
+					const groupEl = document.createElement('div');
+					groupEl.className = 'group';
+
+					const groupCheckbox = document.createElement('input');
+					groupCheckbox.type = 'checkbox';
+					groupCheckbox.className = 'group-toggle';
+					groupCheckbox.dataset.groupKey = group.key;
+					const groupSelectedCount = group.pairs.reduce((total, pair) => (state.selectedPairIds.has(pair.id) ? total + 1 : total), 0);
+					groupCheckbox.checked = groupSelectedCount === group.pairs.length && group.pairs.length > 0;
+					groupCheckbox.indeterminate = groupSelectedCount > 0 && groupSelectedCount < group.pairs.length;
+
+					const table = document.createElement('table');
+					table.className = 'table';
+
+					const thead = document.createElement('thead');
+					const headRow = document.createElement('tr');
+
+					const toggleHeader = document.createElement('th');
+					toggleHeader.style.width = '40px';
+					toggleHeader.appendChild(groupCheckbox);
+
+					const ruleHeader = document.createElement('th');
+					ruleHeader.style.width = '90px';
+					ruleHeader.textContent = group.label;
+
+					const nameHeader = document.createElement('th');
+					nameHeader.textContent = '差分对名';
+
+					const positiveHeader = document.createElement('th');
+					positiveHeader.textContent = '正网络';
+
+					const negativeHeader = document.createElement('th');
+					negativeHeader.textContent = '负网络';
+
+					const existHeader = document.createElement('th');
+					existHeader.style.width = '160px';
+					const existHeaderMeta = document.createElement('div');
+					existHeaderMeta.className = 'header-meta';
+					const existLabel = document.createElement('span');
+					existLabel.textContent = '是否已存在';
+					const count = document.createElement('span');
+					count.className = 'tag';
+					count.textContent = `${group.pairs.length} 对`;
+					existHeaderMeta.appendChild(existLabel);
+					existHeaderMeta.appendChild(count);
+					existHeader.appendChild(existHeaderMeta);
+
+					headRow.appendChild(toggleHeader);
+					headRow.appendChild(ruleHeader);
+					headRow.appendChild(nameHeader);
+					headRow.appendChild(positiveHeader);
+					headRow.appendChild(negativeHeader);
+					headRow.appendChild(existHeader);
+					thead.appendChild(headRow);
+
+					const tbody = document.createElement('tbody');
+
+					group.pairs.forEach((pair, index) => {
+						total += 1;
+						if (pair.existingName) {
+							existCount += 1;
+						}
+
+						const pairCheckbox = document.createElement('input');
+						pairCheckbox.type = 'checkbox';
+						pairCheckbox.checked = state.selectedPairIds.has(pair.id);
+						pairCheckbox.className = 'pair-toggle';
+						pairCheckbox.dataset.pairId = pair.id;
+						pairCheckbox.dataset.groupKey = group.key;
+
+						const row = document.createElement('tr');
+						const checkboxCell = document.createElement('td');
+						checkboxCell.appendChild(pairCheckbox);
+
+						const indexCell = document.createElement('td');
+						indexCell.className = 'cell-muted';
+						indexCell.textContent = `${index + 1}`;
+
+						const nameCell = document.createElement('td');
+						const nameInput = document.createElement('input');
+						nameInput.className = 'name-input';
+						nameInput.value = pair.name;
+						nameInput.addEventListener('input', () => {
+							pair.name = nameInput.value;
+						});
+						nameInput.addEventListener('blur', () => {
+							const next = nameInput.value.trim();
+							if (!next) {
+								nameInput.value = pair.name || '';
+								return;
+							}
+							pair.name = next;
+							nameInput.value = next;
+						});
+						nameCell.appendChild(nameInput);
+
+						const positiveCell = document.createElement('td');
+						const positiveBtn = document.createElement('button');
+						positiveBtn.type = 'button';
+						positiveBtn.className = 'net-link';
+						positiveBtn.textContent = pair.positiveNet;
+						positiveBtn.addEventListener('click', () => locateNet(pair.positiveNet));
+						const positiveWrap = document.createElement('div');
+						positiveWrap.className = 'net-cell';
+						positiveWrap.appendChild(positiveBtn);
+						if (state.showNetLength) {
+							const positiveLength = document.createElement('div');
+							positiveLength.className = 'net-length';
+							positiveLength.textContent = formatLength(state.netLengthMap.get(pair.positiveNet));
+							positiveWrap.appendChild(positiveLength);
+						}
+						positiveCell.appendChild(positiveWrap);
+
+						const negativeCell = document.createElement('td');
+						const negativeBtn = document.createElement('button');
+						negativeBtn.type = 'button';
+						negativeBtn.className = 'net-link';
+						negativeBtn.textContent = pair.negativeNet;
+						negativeBtn.addEventListener('click', () => locateNet(pair.negativeNet));
+						const negativeWrap = document.createElement('div');
+						negativeWrap.className = 'net-cell';
+						negativeWrap.appendChild(negativeBtn);
+						if (state.showNetLength) {
+							const negativeLength = document.createElement('div');
+							negativeLength.className = 'net-length';
+							negativeLength.textContent = formatLength(state.netLengthMap.get(pair.negativeNet));
+							negativeWrap.appendChild(negativeLength);
+						}
+						negativeCell.appendChild(negativeWrap);
+
+						const existCell = document.createElement('td');
+						if (pair.existingName) {
+							const existTag = document.createElement('span');
+							existTag.className = 'tag exist';
+							existTag.textContent = '已存在';
+							existCell.appendChild(existTag);
+						} else {
+							const existText = document.createElement('span');
+							existText.className = 'cell-muted';
+							existText.textContent = '否';
+							existCell.appendChild(existText);
+						}
+
+						row.appendChild(checkboxCell);
+						row.appendChild(indexCell);
+						row.appendChild(nameCell);
+						row.appendChild(positiveCell);
+						row.appendChild(negativeCell);
+						row.appendChild(existCell);
+						tbody.appendChild(row);
+					});
+
+					table.appendChild(thead);
+					table.appendChild(tbody);
+					groupEl.appendChild(table);
+
+					elements.resultList.appendChild(groupEl);
+				});
+
+				elements.summary.textContent = total ? `共 ${total} 对，已存在 ${existCount} 对` : '未找到可识别的差分对';
+				setStatus(total ? '识别完成' : '未识别到差分对');
+				updateSelectAllState();
+				wireGroupCheckboxes();
+			}
+
+			function wireGroupCheckboxes() {
+				const groupToggles = document.querySelectorAll('.group-toggle');
+				groupToggles.forEach((toggle) => {
+					toggle.addEventListener('change', (event) => {
+						const groupKey = event.target.dataset.groupKey;
+						event.target.indeterminate = false;
+						const groupPairs = document.querySelectorAll(`.pair-toggle[data-group-key="${groupKey}"]`);
+						groupPairs.forEach((pairToggle) => {
+							pairToggle.checked = event.target.checked;
+							setPairSelected(pairToggle.dataset.pairId, event.target.checked);
+						});
+						updateGroupToggleState(groupKey);
+						updateSelectAllState();
+					});
+				});
+
+				const pairToggles = document.querySelectorAll('.pair-toggle');
+				pairToggles.forEach((toggle) => {
+					toggle.addEventListener('change', () => {
+						setPairSelected(toggle.dataset.pairId, toggle.checked);
+						updateGroupToggleState(toggle.dataset.groupKey);
+						updateSelectAllState();
+					});
+				});
+			}
+
+			function getSelectedPairs() {
+				syncSelectionFromDom();
+				return state.pairs.filter((pair) => state.selectedPairIds.has(pair.id));
+			}
+
+			async function clearAllHighlights(eda) {
+				if (eda.pcb_Net?.unhighlightAllNets) {
+					await eda.pcb_Net.unhighlightAllNets();
+					state.highlightedNets.clear();
+					return;
+				}
+				if (eda.pcb_Net?.getAllNetsName && eda.pcb_Net?.unhighlightNet) {
+					const nets = await eda.pcb_Net.getAllNetsName();
+					const tasks = nets.map((net) => eda.pcb_Net.unhighlightNet(net));
+					await Promise.all(tasks);
+					state.highlightedNets.clear();
+					return;
+				}
+				if (eda.pcb_Net?.unhighlightNet && state.highlightedNets.size) {
+					const tasks = Array.from(state.highlightedNets).map((highlighted) => eda.pcb_Net.unhighlightNet(highlighted));
+					await Promise.all(tasks);
+					state.highlightedNets.clear();
+				}
+			}
+
+			async function locateNet(net) {
+				const eda = getEda();
+				if (!eda) {
+					setStatus('未检测到 EDA 环境');
+					return;
+				}
+				try {
+					if (eda.pcb_SelectControl?.clearSelected) {
+						await eda.pcb_SelectControl.clearSelected();
+					}
+					await clearAllHighlights(eda);
+					if (eda.pcb_Net?.selectNet) {
+						await eda.pcb_Net.selectNet(net);
+					}
+					if (eda.dmt_EditorControl?.zoomToSelectedPrimitives) {
+						await eda.dmt_EditorControl.zoomToSelectedPrimitives();
+					}
+					if (eda.pcb_Net?.highlightNet) {
+						await eda.pcb_Net.highlightNet(net);
+						state.highlightedNets.add(net);
+					}
+				} catch (error) {
+					setStatus('定位网络失败');
+				}
+			}
+
+			function escapeCsv(value) {
+				const text = value === undefined || value === null ? '' : String(value);
+				if (/[",\n]/.test(text)) {
+					return `"${text.replace(/"/g, '""')}"`;
+				}
+				return text;
+			}
+
+			function exportCsv() {
+				const selected = getSelectedPairs();
+				if (!selected.length) {
+					setStatus('未选择任何差分对');
+					return;
+				}
+				const rows = [['差分对名', '正网络', '负网络', '是否已存在']];
+				selected.forEach((pair) => {
+					rows.push([pair.name, pair.positiveNet, pair.negativeNet, pair.existingName ? '是' : '否']);
+				});
+				const csv = `\ufeff${rows.map((row) => row.map((cell) => escapeCsv(cell)).join(',')).join('\n')}`;
+				const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement('a');
+				const date = new Date().toISOString().slice(0, 10);
+				link.href = url;
+				link.download = `diff_pairs_${date}.csv`;
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				URL.revokeObjectURL(url);
+				setStatus('已导出 CSV');
+			}
+
+			async function scanPairs() {
+				const eda = getEda();
+				if (!eda) {
+					setStatus('未检测到 EDA 环境');
+					return;
+				}
+				setLoading(true, '正在识别差分对');
+				try {
+					const pcbInfo = await eda.dmt_Pcb.getCurrentPcbInfo();
+					if (!pcbInfo) {
+						setStatus('未找到当前 PCB');
+						setLoading(false);
+						return;
+					}
+					const nets = await eda.pcb_Net.getAllNetsName();
+					const existing = await eda.pcb_Drc.getAllDifferentialPairs();
+					buildExistingMap(existing);
+					state.pairs = generatePairs(nets);
+					state.selectedPairIds = new Set(state.pairs.map((pair) => pair.id));
+					state.groups = buildGroups(state.pairs);
+					await ensureNetLengths(state.pairs);
+					renderResults();
+				} catch (error) {
+					setStatus('识别失败，请重试');
+				} finally {
+					setLoading(false);
+				}
+			}
+
+			async function applyPairs() {
+				const eda = getEda();
+				if (!eda) {
+					setStatus('未检测到 EDA 环境');
+					return;
+				}
+				const selected = getSelectedPairs();
+				if (!selected.length) {
+					setStatus('未选择任何差分对');
+					return;
+				}
+				setLoading(true, '正在写入差分对');
+				let success = 0;
+				let skipped = 0;
+				let failed = 0;
+				try {
+					for (const pair of selected) {
+						if (pair.existingName) {
+							skipped += 1;
+							continue;
+						}
+						const ok = await eda.pcb_Drc.createDifferentialPair(pair.name, pair.positiveNet, pair.negativeNet);
+						if (ok) {
+							success += 1;
+							state.existingMap.set(`${pair.positiveNet}||${pair.negativeNet}`, pair.name);
+							pair.existingName = pair.name;
+						} else {
+							failed += 1;
+						}
+					}
+					const pcbInfo = await eda.dmt_Pcb.getCurrentPcbInfo();
+					if (pcbInfo && success > 0) {
+						await eda.pcb_Document.save(pcbInfo.uuid);
+					}
+					setStatus(`写入完成：成功 ${success}，跳过 ${skipped}，失败 ${failed}`);
+					state.groups = buildGroups(state.pairs);
+					renderResults();
+				} catch (error) {
+					setStatus('写入失败，请重试');
+				} finally {
+					setLoading(false);
+				}
+			}
+
+			function bindEvents() {
+				elements.addRuleBtn.addEventListener('click', () => {
+					const rule = normalizeRule(elements.ruleA.value, elements.ruleB.value);
+					if (!rule) {
+						setStatus('请输入两个不同的单字符规则');
+						return;
+					}
+					if (!hasRule(rule)) {
+						state.customRules.push({ ...rule, custom: true });
+						saveCustomRules();
+						refreshRules();
+						scanPairs();
+					}
+					elements.ruleA.value = '';
+					elements.ruleB.value = '';
+				});
+
+				elements.rescanBtn.addEventListener('click', () => scanPairs());
+				elements.exportBtn.addEventListener('click', () => exportCsv());
+				elements.applyBtnBottom.addEventListener('click', () => applyPairs());
+				elements.toggleLength.addEventListener('change', async (event) => {
+					state.showNetLength = event.target.checked;
+					await ensureNetLengths(state.pairs);
+					renderResults();
+				});
+				elements.selectAll.addEventListener('change', (event) => {
+					const checked = event.target.checked;
+					event.target.indeterminate = false;
+					state.selectedPairIds = checked ? new Set(state.pairs.map((pair) => pair.id)) : new Set();
+					const pairToggles = document.querySelectorAll('.pair-toggle');
+					pairToggles.forEach((toggle) => {
+						toggle.checked = checked;
+					});
+					const groupToggles = document.querySelectorAll('.group-toggle');
+					groupToggles.forEach((toggle) => {
+						toggle.checked = checked;
+						toggle.indeterminate = false;
+					});
+				});
+
+				const controlButtons = document.querySelectorAll('.window-dot');
+				controlButtons.forEach((button) => {
+					button.addEventListener('click', () => {
+						const action = button.dataset.action;
+						const eda = getEda();
+						if (action === 'close') {
+							if (isIFrameContext && eda?.sys_IFrame?.closeIFrame) {
+								eda.sys_IFrame.closeIFrame('diff-pair-assistant');
+							} else {
+								window.close();
+							}
+						} else if (action === 'minimize') {
+							if (isIFrameContext && eda?.sys_IFrame?.hideIFrame) {
+								eda.sys_IFrame.hideIFrame('diff-pair-assistant');
+							}
+						} else if (action === 'maximize') {
+							if (isIFrameContext && eda?.sys_IFrame?.showIFrame) {
+								eda.sys_IFrame.showIFrame('diff-pair-assistant');
+							}
+						}
+					});
+				});
+			}
+
+			state.customRules = loadCustomRules();
+			refreshRules();
+			bindEvents();
+			scanPairs();
+		</script>
+	</body>
+</html>

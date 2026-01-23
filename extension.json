@@ -1,0 +1,41 @@
+{
+	"name": "diff-pair-assistant",
+	"uuid": "3f48035397a64fb8a96d88da3c3ae48c",
+	"displayName": "差分对雷达",
+	"description": "极速识别 PCB 差分对并一键写入",
+	"version": "26.1.8",
+	"publisher": "Ocean",
+	"engines": {
+		"eda": "^2.3.0"
+	},
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "extension-store",
+		"url": ""
+	},
+	"categories": "PCB",
+	"keywords": ["Differential Pair", "PCB", "Net"],
+	"images": {
+		"logo": "./images/logo.png"
+	},
+	"homepage": "https://pro.lceda.cn",
+	"bugs": "https://lceda.cn/page/feedback?originPage=other",
+	"activationEvents": {},
+	"entry": "./dist/index",
+	"dependentExtensions": {},
+	"headerMenus": {
+		"pcb": [
+			{
+				"id": "DiffPairAssistant",
+				"title": "差分对雷达",
+				"menuItems": [
+					{
+						"id": "OpenAssistant",
+						"title": "差分对雷达",
+						"registerFn": "openDiffPairAssistant"
+					}
+				]
+			}
+		]
+	}
+}
