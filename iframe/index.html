@@ -491,6 +491,8 @@
 
 			.sort-indicator {
 				font-size: 12px;
+				width: 12px;
+				text-align: center;
 			}
 
 			.tag {
@@ -622,7 +624,7 @@
 					<button class="theme-toggle" id="themeToggle">浅色</button>
 				</div>
 				<div class="titlebar-right">
-					<span class="rate-text">插件太方便了叭！！😍🤝我来点亮五颗星 / 有点儿不太好用呢！我想要... ！😘👉</span>
+					<span class="rate-text">鼓励一下👍 / 功能建议💡</span>
 					<a
 						class="version-badge version-link"
 						id="versionLink"
@@ -687,7 +689,7 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.11';
+			const APP_VERSION = '26.1.12';
 			const STORAGE_KEY = 'diffPairRules';
 			const THEME_KEY = 'diffPairTheme';
 			const DEFAULT_RULES = [
@@ -709,6 +711,10 @@
 				highlightedNets: new Set(),
 				selectedPairIds: new Set(),
 				existSort: 'none',
+				netSort: {
+					key: null,
+					dir: 'none',
+				},
 			};
 
 			const elements = {
@@ -1048,6 +1054,16 @@
 				state.selectedPairIds = selectedIds;
 			}
 
+			function getSortIndicator(dir) {
+				if (dir === 'asc') {
+					return '↑';
+				}
+				if (dir === 'desc') {
+					return '↓';
+				}
+				return '↕';
+			}
+
 			function getExistSortIndicator() {
 				if (state.existSort === 'existFirst') {
 					return '↑';
@@ -1055,10 +1071,11 @@
 				if (state.existSort === 'missingFirst') {
 					return '↓';
 				}
-				return '';
+				return '↕';
 			}
 
 			function toggleExistSort() {
+				state.netSort = { key: null, dir: 'none' };
 				if (state.existSort === 'none') {
 					state.existSort = 'existFirst';
 				} else if (state.existSort === 'existFirst') {
@@ -1069,7 +1086,47 @@
 				renderResults();
 			}
 
+			function toggleNetSort(key) {
+				state.existSort = 'none';
+				if (state.netSort.key !== key) {
+					state.netSort = { key, dir: 'asc' };
+					renderResults();
+					return;
+				}
+				if (state.netSort.dir === 'asc') {
+					state.netSort = { key, dir: 'desc' };
+				} else if (state.netSort.dir === 'desc') {
+					state.netSort = { key: null, dir: 'none' };
+				} else {
+					state.netSort = { key, dir: 'asc' };
+				}
+				renderResults();
+			}
+
+			function getNetSortIndicator(key) {
+				if (state.netSort.key !== key) {
+					return '↕';
+				}
+				return getSortIndicator(state.netSort.dir);
+			}
+
 			function getSortedPairs(pairs) {
+				if (state.netSort.key && state.netSort.dir !== 'none') {
+					const direction = state.netSort.dir === 'asc' ? 1 : -1;
+					const field = state.netSort.key;
+					return pairs
+						.map((pair, index) => ({ pair, index }))
+						.sort((a, b) => {
+							const aVal = field === 'positive' ? a.pair.positiveNet : a.pair.negativeNet;
+							const bVal = field === 'positive' ? b.pair.positiveNet : b.pair.negativeNet;
+							const result = aVal.localeCompare(bVal, 'zh-Hans', { numeric: true, sensitivity: 'base' });
+							if (result !== 0) {
+								return result * direction;
+							}
+							return a.index - b.index;
+						})
+						.map((item) => item.pair);
+				}
 				if (state.existSort === 'none') {
 					return pairs;
 				}
@@ -1131,10 +1188,32 @@
 					nameHeader.textContent = '差分对名';
 
 					const positiveHeader = document.createElement('th');
-					positiveHeader.textContent = '正网络';
+					const positiveSortBtn = document.createElement('button');
+					positiveSortBtn.type = 'button';
+					positiveSortBtn.className = 'sort-toggle';
+					const positiveLabel = document.createElement('span');
+					positiveLabel.textContent = '正网络';
+					const positiveIndicator = document.createElement('span');
+					positiveIndicator.className = 'sort-indicator';
+					positiveIndicator.textContent = getNetSortIndicator('positive');
+					positiveSortBtn.appendChild(positiveLabel);
+					positiveSortBtn.appendChild(positiveIndicator);
+					positiveSortBtn.addEventListener('click', () => toggleNetSort('positive'));
+					positiveHeader.appendChild(positiveSortBtn);
 
 					const negativeHeader = document.createElement('th');
-					negativeHeader.textContent = '负网络';
+					const negativeSortBtn = document.createElement('button');
+					negativeSortBtn.type = 'button';
+					negativeSortBtn.className = 'sort-toggle';
+					const negativeLabel = document.createElement('span');
+					negativeLabel.textContent = '负网络';
+					const negativeIndicator = document.createElement('span');
+					negativeIndicator.className = 'sort-indicator';
+					negativeIndicator.textContent = getNetSortIndicator('negative');
+					negativeSortBtn.appendChild(negativeLabel);
+					negativeSortBtn.appendChild(negativeIndicator);
+					negativeSortBtn.addEventListener('click', () => toggleNetSort('negative'));
+					negativeHeader.appendChild(negativeSortBtn);
 
 					const existHeader = document.createElement('th');
 					existHeader.style.width = '140px';
