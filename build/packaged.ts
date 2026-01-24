@@ -2,6 +2,8 @@ import fs from 'fs-extra';
 import ignore from 'ignore';
 import JSZip from 'jszip';
 
+import * as extensionConfig from '../extension.json';
+
 /**
  * 将多行字符串拆分成字符串数组
  *
@@ -46,10 +48,6 @@ function fixUuid(uuid?: string): string {
  * 主逻辑方法
  */
 function main() {
-	const extensionConfig = fs.readJsonSync(__dirname + '/../extension.json');
-	console.log('Building version:', extensionConfig.version);
-	console.log('Output path:', __dirname + '/dist/' + extensionConfig.name + '_v' + extensionConfig.version + '.eext');
-
 	if (!testUuid(extensionConfig.uuid)) {
 		const newExtensionConfig = { ...extensionConfig };
 		// @ts-ignore
@@ -79,18 +77,14 @@ function main() {
 		}
 	}
 
-	console.log('File list length:', fileList.length);
-
 	const zip = new JSZip();
 	for (const file of fileList) {
 		zip.file(file, fs.createReadStream(__dirname + '/../' + file));
 	}
 
-	zip.generateNodeStream({ type: 'nodebuffer', streamFiles: true })
-		.pipe(fs.createWriteStream(__dirname + '/dist/' + extensionConfig.name + '_v' + extensionConfig.version + '.eext'))
-		.on('finish', () => {
-			console.log('eext file written successfully.');
-		});
+	zip.generateNodeStream({ type: 'nodebuffer', streamFiles: true }).pipe(
+		fs.createWriteStream(__dirname + '/dist/' + extensionConfig.name + '_v' + extensionConfig.version + '.eext'),
+	);
 }
 
 main();

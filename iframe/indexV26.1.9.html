@@ -19,31 +19,6 @@
 				--warning: #f59e0b;
 				--danger: #ef4444;
 				--chip: #f1f5f9;
-				--soft: #f8fafc;
-				--table-head: #f1f5f9;
-				--table-hover: #f8fafc;
-				--tag: #e2e8f0;
-				--button: #eef2ff;
-				--button-text: #334155;
-			}
-
-			[data-theme='dark'] {
-				color-scheme: dark;
-				--bg: #0b1220;
-				--card: #0f172a;
-				--text: #e2e8f0;
-				--muted: #94a3b8;
-				--primary: #60a5fa;
-				--primary-contrast: #0b1220;
-				--border: #1f2a44;
-				--shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
-				--chip: #1e293b;
-				--soft: #111827;
-				--table-head: #111827;
-				--table-hover: #0f1b33;
-				--tag: #1f2a44;
-				--button: #1f2a44;
-				--button-text: #e2e8f0;
 			}
 
 			* {
@@ -59,9 +34,6 @@
 				background: var(--bg);
 				color: var(--text);
 				overflow: hidden;
-				transition:
-					background-color 0.25s ease,
-					color 0.25s ease;
 			}
 
 			.app {
@@ -80,9 +52,6 @@
 				background: var(--card);
 				border-radius: 14px;
 				box-shadow: var(--shadow);
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
 			}
 
 			.titlebar-left {
@@ -95,39 +64,15 @@
 				display: flex;
 				align-items: center;
 				gap: 12px;
-				flex-wrap: wrap;
 				color: var(--muted);
 				font-weight: 600;
 				font-size: 13px;
 			}
 
-			.rate-text {
-				color: var(--muted);
-				font-weight: 600;
-				max-width: none;
-				white-space: normal;
-				overflow: visible;
-				text-overflow: clip;
-			}
-
 			.version-badge {
 				padding: 4px 10px;
 				border-radius: 999px;
-				background: var(--tag);
-				color: var(--text);
-				text-decoration: none;
-			}
-
-			.version-link {
-				cursor: pointer;
-			}
-
-			.theme-toggle {
-				padding: 6px 10px;
-				border-radius: 999px;
-				font-size: 12px;
-				background: var(--button);
-				color: var(--button-text);
+				background: #f1f5f9;
 			}
 
 			.window-controls {
@@ -168,8 +113,8 @@
 				font-size: 14px;
 				font-weight: 600;
 				cursor: pointer;
-				background: var(--button);
-				color: var(--button-text);
+				background: #eef2ff;
+				color: #334155;
 				transition: all 0.2s ease;
 			}
 
@@ -191,9 +136,6 @@
 				display: flex;
 				flex-direction: column;
 				gap: 10px;
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
 			}
 
 			.section-title {
@@ -211,19 +153,19 @@
 				gap: 12px;
 			}
 
+			.section-title-right {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				color: var(--text);
+			}
+
 			input[type='checkbox'] {
 				accent-color: var(--primary);
 			}
 
 			input[type='checkbox']:indeterminate {
 				accent-color: var(--warning);
-			}
-
-			.section-title-right {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-				color: var(--text);
 			}
 
 			.select-all {
@@ -242,27 +184,6 @@
 				font-weight: 600;
 				color: var(--text);
 				cursor: pointer;
-			}
-
-			.eye-toggle {
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				width: 26px;
-				height: 26px;
-				border-radius: 999px;
-				border: none;
-				background: var(--tag);
-				color: var(--text);
-				padding: 0;
-				cursor: pointer;
-			}
-
-			.eye-toggle svg {
-				width: 16px;
-				height: 16px;
-				display: block;
-				fill: currentColor;
 			}
 
 			.rules-layout {
@@ -286,7 +207,7 @@
 				background: var(--chip);
 				font-size: 13px;
 				font-weight: 600;
-				color: var(--muted);
+				color: #475569;
 				position: relative;
 				display: inline-flex;
 				align-items: center;
@@ -301,7 +222,7 @@
 				height: 16px;
 				border-radius: 999px;
 				background: rgba(15, 23, 42, 0.12);
-				color: var(--muted);
+				color: #475569;
 				font-size: 12px;
 				display: none;
 				align-items: center;
@@ -317,7 +238,7 @@
 				display: flex;
 				gap: 8px;
 				align-items: center;
-				background: var(--soft);
+				background: #f8fafc;
 				padding: 8px 10px;
 				border-radius: 12px;
 				border: 1px solid var(--border);
@@ -332,8 +253,7 @@
 				text-align: left;
 				padding: 0 8px;
 				font-weight: 600;
-				background: var(--card);
-				color: var(--text);
+				background: #ffffff;
 			}
 
 			.rule-add span {
@@ -372,19 +292,6 @@
 				gap: 10px;
 			}
 
-			.group-header {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-			}
-
-			.group-title {
-				display: flex;
-				align-items: center;
-				gap: 10px;
-				font-weight: 600;
-			}
-
 			.table {
 				width: 100%;
 				border-collapse: collapse;
@@ -394,8 +301,8 @@
 			.table thead th {
 				text-align: left;
 				padding: 6px 8px;
-				background: var(--table-head);
-				color: var(--muted);
+				background: #f1f5f9;
+				color: #475569;
 				font-weight: 600;
 				border-bottom: 1px solid var(--border);
 				position: sticky;
@@ -405,12 +312,12 @@
 
 			.table tbody td {
 				padding: 6px 8px;
-				border-bottom: 1px solid var(--border);
+				border-bottom: 1px solid #e2e8f0;
 				vertical-align: middle;
 			}
 
 			.table tbody tr:hover {
-				background: var(--table-hover);
+				background: #f8fafc;
 			}
 
 			.cell-name {
@@ -435,7 +342,7 @@
 			.name-input:focus {
 				outline: none;
 				border-color: var(--primary);
-				background: var(--card);
+				background: #ffffff;
 				box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 			}
 
@@ -472,8 +379,8 @@
 				border-radius: 8px;
 				font-size: 12px;
 				font-weight: 600;
-				background: var(--tag);
-				color: var(--muted);
+				background: #e2e8f0;
+				color: #475569;
 			}
 
 			.tag.positive {
@@ -500,9 +407,6 @@
 				padding: 12px 16px;
 				box-shadow: var(--shadow);
 				gap: 16px;
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
 			}
 
 			.status {
@@ -540,40 +444,15 @@
 				flex-direction: column;
 				align-items: center;
 				gap: 12px;
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
 			}
 
 			.spinner {
 				width: 36px;
 				height: 36px;
 				border-radius: 999px;
-				border: 4px solid var(--border);
+				border: 4px solid #e2e8f0;
 				border-top-color: var(--primary);
 				animation: spin 0.9s linear infinite;
-			}
-
-			.rule-tools {
-				display: inline-flex;
-				align-items: center;
-				gap: 8px;
-				color: var(--muted);
-				font-size: 12px;
-				font-weight: 600;
-			}
-
-			.icon-button {
-				width: 26px;
-				height: 26px;
-				border-radius: 999px;
-				padding: 0;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				background: var(--tag);
-				color: var(--text);
-				font-size: 14px;
 			}
 
 			@keyframes spin {
@@ -593,27 +472,16 @@
 						<div class="window-dot maximize" data-action="maximize"></div>
 					</div>
 					<div class="title">差分对雷达</div>
-					<button class="theme-toggle" id="themeToggle">浅色</button>
 				</div>
 				<div class="titlebar-right">
-					<span class="rate-text">插件太方便了叭！！😍🤝我来点亮五颗星 / 有点儿不太好用呢！我想要... ！😘👉</span>
-					<a
-						class="version-badge version-link"
-						id="versionLink"
-						href="https://ext.lceda.cn/item/zero1798/diff-pair-assistant"
-						target="_blank"
-						rel="noopener noreferrer"
-					></a>
+					<span class="version-badge" id="versionText"></span>
 				</div>
 			</header>
 
 			<section class="section">
 				<div class="section-title">
 					<span>识别规则</span>
-					<div class="rule-tools">
-						<button class="icon-button" id="resetRulesBtn" type="button" title="重置为默认规则">↺</button>
-						<span>重置为默认规则</span>
-					</div>
+					<span id="ruleHint">默认规则已启用</span>
 				</div>
 				<div class="rules-layout">
 					<div class="rule-chips" id="ruleChips"></div>
@@ -634,10 +502,7 @@
 					</div>
 					<div class="section-title-right">
 						<span id="summary"></span>
-						<div class="length-toggle">
-							<button class="eye-toggle" id="toggleLength" type="button" aria-pressed="false" title="显示长度/隐藏长度"></button>
-							<span>长度</span>
-						</div>
+						<label class="length-toggle"><input type="checkbox" id="toggleLength" /> 长度</label>
 					</div>
 				</div>
 				<div class="result-list" id="resultList"></div>
@@ -661,9 +526,8 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.10';
 			const STORAGE_KEY = 'diffPairRules';
-			const THEME_KEY = 'diffPairTheme';
+			const APP_VERSION = '26.1.9';
 			const DEFAULT_RULES = [
 				{ a: 'P', b: 'N', custom: false },
 				{ a: '+', b: '-', custom: false },
@@ -672,7 +536,7 @@
 			];
 
 			const state = {
-				defaultRules: DEFAULT_RULES.map((rule) => ({ ...rule })),
+				defaultRules: DEFAULT_RULES,
 				customRules: [],
 				rules: [],
 				pairs: [],
@@ -699,28 +563,11 @@
 				toggleLength: document.getElementById('toggleLength'),
 				loading: document.getElementById('loading'),
 				loadingText: document.getElementById('loadingText'),
-				themeToggle: document.getElementById('themeToggle'),
-				versionLink: document.getElementById('versionLink'),
-				resetRulesBtn: document.getElementById('resetRulesBtn'),
+				versionText: document.getElementById('versionText'),
 			};
 
-			function renderLengthToggle() {
-				if (!elements.toggleLength) return;
-				const isOn = state.showNetLength;
-				elements.toggleLength.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-				elements.toggleLength.title = '显示长度/隐藏长度';
-				elements.toggleLength.innerHTML = isOn
-					? `
-						<svg viewBox="0 0 24 24" aria-hidden="true">
-							<path d="M12 5c-5.5 0-9.7 4.3-10.7 6 .9 1.7 5.2 6 10.7 6s9.7-4.3 10.7-6C21.7 9.3 17.5 5 12 5zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"></path>
-							<circle cx="12" cy="11" r="2.2"></circle>
-						</svg>
-					`
-					: `
-						<svg viewBox="0 0 24 24" aria-hidden="true">
-							<path d="M4.6 3.2 3.2 4.6l3 3C4 9.1 2.9 10.6 2.5 11.2c.9 1.7 5.2 6 10.7 6 1.8 0 3.4-.4 4.8-1l3.3 3.3 1.4-1.4L4.6 3.2zm7.9 11.9a4 4 0 0 1-4-4c0-.5.1-1 .3-1.5l5.2 5.2c-.5.2-1 .3-1.5.3zm4.7-2.2-2-2a4 4 0 0 0-5.1-5.1l-1.7-1.7A9.9 9.9 0 0 1 12 5c5.5 0 9.7 4.3 10.7 6-.3.6-1.6 2.5-3.7 4.1z"></path>
-						</svg>
-					`;
+			if (elements.versionText) {
+				elements.versionText.textContent = `v${APP_VERSION}`;
 			}
 
 			const isIFrameContext = Boolean(window.parent && window.parent !== window && window.parent.eda);
@@ -751,25 +598,6 @@
 
 			function setStatus(text) {
 				elements.statusText.textContent = text;
-			}
-
-			function setTheme(theme) {
-				const safeTheme = theme === 'dark' ? 'dark' : 'light';
-				document.documentElement.setAttribute('data-theme', safeTheme);
-				localStorage.setItem(THEME_KEY, safeTheme);
-				if (elements.themeToggle) {
-					elements.themeToggle.textContent = safeTheme === 'dark' ? '深色' : '浅色';
-				}
-			}
-
-			function toggleTheme() {
-				const current = document.documentElement.getAttribute('data-theme') || 'light';
-				setTheme(current === 'dark' ? 'light' : 'dark');
-			}
-
-			function initTheme() {
-				const stored = localStorage.getItem(THEME_KEY);
-				setTheme(stored === 'dark' ? 'dark' : 'light');
 			}
 
 			function loadCustomRules() {
@@ -1032,11 +860,11 @@
 
 					const groupCheckbox = document.createElement('input');
 					groupCheckbox.type = 'checkbox';
+					groupCheckbox.className = 'group-toggle';
+					groupCheckbox.dataset.groupKey = group.key;
 					const groupSelectedCount = group.pairs.reduce((total, pair) => (state.selectedPairIds.has(pair.id) ? total + 1 : total), 0);
 					groupCheckbox.checked = groupSelectedCount === group.pairs.length && group.pairs.length > 0;
 					groupCheckbox.indeterminate = groupSelectedCount > 0 && groupSelectedCount < group.pairs.length;
-					groupCheckbox.className = 'group-toggle';
-					groupCheckbox.dataset.groupKey = group.key;
 
 					const table = document.createElement('table');
 					table.className = 'table';
@@ -1360,6 +1188,10 @@
 							failed += 1;
 						}
 					}
+					const pcbInfo = await eda.dmt_Pcb.getCurrentPcbInfo();
+					if (pcbInfo && success > 0) {
+						await eda.pcb_Document.save(pcbInfo.uuid);
+					}
 					setStatus(`写入完成：成功 ${success}，跳过 ${skipped}，失败 ${failed}`);
 					state.groups = buildGroups(state.pairs);
 					renderResults();
@@ -1390,14 +1222,11 @@
 				elements.rescanBtn.addEventListener('click', () => scanPairs());
 				elements.exportBtn.addEventListener('click', () => exportCsv());
 				elements.applyBtnBottom.addEventListener('click', () => applyPairs());
-				if (elements.toggleLength) {
-					elements.toggleLength.addEventListener('click', async () => {
-						state.showNetLength = !state.showNetLength;
-						renderLengthToggle();
-						await ensureNetLengths(state.pairs);
-						renderResults();
-					});
-				}
+				elements.toggleLength.addEventListener('change', async (event) => {
+					state.showNetLength = event.target.checked;
+					await ensureNetLengths(state.pairs);
+					renderResults();
+				});
 				elements.selectAll.addEventListener('change', (event) => {
 					const checked = event.target.checked;
 					event.target.indeterminate = false;
@@ -1412,21 +1241,6 @@
 						toggle.indeterminate = false;
 					});
 				});
-
-				if (elements.themeToggle) {
-					elements.themeToggle.addEventListener('click', toggleTheme);
-				}
-
-				if (elements.resetRulesBtn) {
-					elements.resetRulesBtn.addEventListener('click', () => {
-						state.defaultRules = DEFAULT_RULES.map((rule) => ({ ...rule }));
-						state.customRules = [];
-						saveCustomRules();
-						refreshRules();
-						scanPairs();
-						setStatus('已重置为默认规则');
-					});
-				}
 
 				const controlButtons = document.querySelectorAll('.window-dot');
 				controlButtons.forEach((button) => {
@@ -1452,13 +1266,7 @@
 				});
 			}
 
-			if (elements.versionLink) {
-				elements.versionLink.textContent = `v${APP_VERSION}`;
-			}
-
 			state.customRules = loadCustomRules();
-			initTheme();
-			renderLengthToggle();
 			refreshRules();
 			bindEvents();
 			scanPairs();
