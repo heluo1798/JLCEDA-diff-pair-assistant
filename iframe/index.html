@@ -123,11 +123,34 @@
 			}
 
 			.theme-toggle {
-				padding: 6px 10px;
+				padding: 6px 28px 6px 10px;
 				border-radius: 999px;
 				font-size: 12px;
 				background: var(--button);
 				color: var(--button-text);
+				position: relative;
+				overflow: hidden;
+				transition:
+					background-color 0.2s ease,
+					color 0.2s ease;
+			}
+
+			.theme-toggle::after {
+				content: '';
+				position: absolute;
+				top: 2px;
+				right: 2px;
+				width: 20px;
+				height: 20px;
+				border-radius: 999px;
+				background: var(--text);
+				transition:
+					transform 0.2s ease,
+					background-color 0.2s ease;
+			}
+
+			.theme-toggle[data-theme='dark']::after {
+				transform: translateX(-38px);
 			}
 
 			.window-controls {
@@ -536,6 +559,25 @@
 			.status {
 				color: var(--muted);
 				font-size: 13px;
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+
+			.status-error {
+				color: var(--danger);
+			}
+
+			.status-warning {
+				color: var(--warning);
+			}
+
+			.status-info {
+				color: var(--primary);
+			}
+
+			.status-success {
+				color: var(--success);
 			}
 
 			.actions {
@@ -624,7 +666,7 @@
 					<button class="theme-toggle" id="themeToggle">浅色</button>
 				</div>
 				<div class="titlebar-right">
-					<span class="rate-text">鼓励一下👍 / 功能建议💡</span>
+					<span class="rate-text">👍鼓励一下 / 💡功能建议 👉👉👉</span>
 					<a
 						class="version-badge version-link"
 						id="versionLink"
@@ -672,7 +714,7 @@
 			</section>
 
 			<footer class="footer">
-				<div class="status" id="statusText">等待识别</div>
+				<div class="status status-info" id="statusText">❔ 等待识别</div>
 				<div class="actions">
 					<button id="rescanBtn">重新识别</button>
 					<button id="exportBtn">导出CSV</button>
@@ -689,7 +731,7 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.12';
+			const APP_VERSION = '26.1.13';
 			const STORAGE_KEY = 'diffPairRules';
 			const THEME_KEY = 'diffPairTheme';
 			const DEFAULT_RULES = [
@@ -782,8 +824,18 @@
 				}
 			}
 
-			function setStatus(text) {
-				elements.statusText.textContent = text;
+			function setStatus(text, severity = 'info') {
+				const statusMap = {
+					error: { icon: '❌' },
+					warning: { icon: '⚠️' },
+					info: { icon: '❔' },
+					success: { icon: '✅' },
+				};
+				const safeSeverity = statusMap[severity] ? severity : 'info';
+				const { icon } = statusMap[safeSeverity];
+				elements.statusText.textContent = `${icon} ${text}`;
+				elements.statusText.classList.remove('status-error', 'status-warning', 'status-info', 'status-success');
+				elements.statusText.classList.add(`status-${safeSeverity}`);
 			}
 
 			function setTheme(theme) {
@@ -792,6 +844,7 @@
 				localStorage.setItem(THEME_KEY, safeTheme);
 				if (elements.themeToggle) {
 					elements.themeToggle.textContent = safeTheme === 'dark' ? '深色' : '浅色';
+					elements.themeToggle.setAttribute('data-theme', safeTheme);
 				}
 			}
 
@@ -825,7 +878,7 @@
 					const payload = state.customRules.map((rule) => ({ a: rule.a, b: rule.b }));
 					localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
 				} catch (error) {
-					setStatus('规则保存失败');
+					setStatus('规则保存失败', 'error');
 				}
 			}
 
@@ -1344,7 +1397,7 @@
 				});
 
 				elements.summary.textContent = total ? `共 ${total} 对，已存在 ${existCount} 对` : '未找到可识别的差分对';
-				setStatus(total ? '识别完成' : '未识别到差分对');
+				setStatus(total ? '识别完成' : '未识别到差分对', total ? 'success' : 'warning');
 				updateSelectAllState();
 				wireGroupCheckboxes();
 			}
@@ -1403,7 +1456,7 @@
 			async function locateNet(net) {
 				const eda = getEda();
 				if (!eda) {
-					setStatus('未检测到 EDA 环境');
+					setStatus('未检测到 EDA 环境', 'error');
 					return;
 				}
 				try {
@@ -1422,7 +1475,7 @@
 						state.highlightedNets.add(net);
 					}
 				} catch (error) {
-					setStatus('定位网络失败');
+					setStatus('定位网络失败', 'error');
 				}
 			}
 
@@ -1437,7 +1490,7 @@
 			function exportCsv() {
 				const selected = getSelectedPairs();
 				if (!selected.length) {
-					setStatus('未选择任何差分对');
+					setStatus('未选择任何差分对', 'warning');
 					return;
 				}
 				const rows = [['差分对名', '正网络', '负网络', '是否已存在']];
@@ -1455,20 +1508,20 @@
 				link.click();
 				link.remove();
 				URL.revokeObjectURL(url);
-				setStatus('已导出 CSV');
+				setStatus('已导出 CSV', 'success');
 			}
 
 			async function scanPairs() {
 				const eda = getEda();
 				if (!eda) {
-					setStatus('未检测到 EDA 环境');
+					setStatus('未检测到 EDA 环境', 'error');
 					return;
 				}
 				setLoading(true, '正在识别差分对');
 				try {
 					const pcbInfo = await eda.dmt_Pcb.getCurrentPcbInfo();
 					if (!pcbInfo) {
-						setStatus('未找到当前 PCB');
+						setStatus('未找到当前 PCB', 'error');
 						setLoading(false);
 						return;
 					}
@@ -1481,7 +1534,7 @@
 					await ensureNetLengths(state.pairs);
 					renderResults();
 				} catch (error) {
-					setStatus('识别失败，请重试');
+					setStatus('识别失败，请重试', 'error');
 				} finally {
 					setLoading(false);
 				}
@@ -1490,12 +1543,12 @@
 			async function applyPairs() {
 				const eda = getEda();
 				if (!eda) {
-					setStatus('未检测到 EDA 环境');
+					setStatus('未检测到 EDA 环境', 'error');
 					return;
 				}
 				const selected = getSelectedPairs();
 				if (!selected.length) {
-					setStatus('未选择任何差分对');
+					setStatus('未选择任何差分对', 'warning');
 					return;
 				}
 				setLoading(true, '正在写入差分对');
@@ -1517,11 +1570,12 @@
 							failed += 1;
 						}
 					}
-					setStatus(`写入完成：成功 ${success}，跳过 ${skipped}，失败 ${failed}`);
+					const severity = failed > 0 ? 'warning' : success > 0 ? 'success' : 'info';
+					setStatus(`写入完成：成功 ${success}，跳过 ${skipped}，失败 ${failed}`, severity);
 					state.groups = buildGroups(state.pairs);
 					renderResults();
 				} catch (error) {
-					setStatus('写入失败，请重试');
+					setStatus('写入失败，请重试', 'error');
 				} finally {
 					setLoading(false);
 				}
@@ -1531,7 +1585,7 @@
 				elements.addRuleBtn.addEventListener('click', () => {
 					const rule = normalizeRule(elements.ruleA.value, elements.ruleB.value);
 					if (!rule) {
-						setStatus('请输入两个长度相同且不同的规则');
+						setStatus('请输入两个长度相同且不同的规则', 'warning');
 						return;
 					}
 					if (!hasRule(rule)) {
@@ -1543,6 +1597,14 @@
 					elements.ruleA.value = '';
 					elements.ruleB.value = '';
 				});
+				const handleRuleEnter = (event) => {
+					if (event.key === 'Enter') {
+						event.preventDefault();
+						elements.addRuleBtn.click();
+					}
+				};
+				elements.ruleA.addEventListener('keydown', handleRuleEnter);
+				elements.ruleB.addEventListener('keydown', handleRuleEnter);
 
 				elements.rescanBtn.addEventListener('click', () => scanPairs());
 				elements.exportBtn.addEventListener('click', () => exportCsv());
@@ -1581,7 +1643,7 @@
 						saveCustomRules();
 						refreshRules();
 						scanPairs();
-						setStatus('已重置为默认规则');
+						setStatus('已重置为默认规则', 'success');
 					});
 				}
 
