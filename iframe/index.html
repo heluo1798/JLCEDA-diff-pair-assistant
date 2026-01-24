@@ -467,6 +467,32 @@
 				gap: 8px;
 			}
 
+			.header-inline {
+				display: inline-flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.sort-toggle {
+				display: inline-flex;
+				align-items: center;
+				gap: 4px;
+				background: transparent;
+				color: var(--muted);
+				font-weight: 600;
+				padding: 0;
+				border-radius: 0;
+			}
+
+			.sort-toggle:hover {
+				transform: none;
+				color: var(--text);
+			}
+
+			.sort-indicator {
+				font-size: 12px;
+			}
+
 			.tag {
 				padding: 4px 8px;
 				border-radius: 8px;
@@ -661,7 +687,7 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.10';
+			const APP_VERSION = '26.1.11';
 			const STORAGE_KEY = 'diffPairRules';
 			const THEME_KEY = 'diffPairTheme';
 			const DEFAULT_RULES = [
@@ -682,6 +708,7 @@
 				showNetLength: false,
 				highlightedNets: new Set(),
 				selectedPairIds: new Set(),
+				existSort: 'none',
 			};
 
 			const elements = {
@@ -1021,6 +1048,45 @@
 				state.selectedPairIds = selectedIds;
 			}
 
+			function getExistSortIndicator() {
+				if (state.existSort === 'existFirst') {
+					return '↑';
+				}
+				if (state.existSort === 'missingFirst') {
+					return '↓';
+				}
+				return '';
+			}
+
+			function toggleExistSort() {
+				if (state.existSort === 'none') {
+					state.existSort = 'existFirst';
+				} else if (state.existSort === 'existFirst') {
+					state.existSort = 'missingFirst';
+				} else {
+					state.existSort = 'none';
+				}
+				renderResults();
+			}
+
+			function getSortedPairs(pairs) {
+				if (state.existSort === 'none') {
+					return pairs;
+				}
+				const direction = state.existSort === 'existFirst' ? -1 : 1;
+				return pairs
+					.map((pair, index) => ({ pair, index }))
+					.sort((a, b) => {
+						const aVal = a.pair.existingName ? 1 : 0;
+						const bVal = b.pair.existingName ? 1 : 0;
+						if (aVal !== bVal) {
+							return (aVal - bVal) * direction;
+						}
+						return a.index - b.index;
+					})
+					.map((item) => item.pair);
+			}
+
 			function renderResults() {
 				elements.resultList.innerHTML = '';
 				let total = 0;
@@ -1049,8 +1115,17 @@
 					toggleHeader.appendChild(groupCheckbox);
 
 					const ruleHeader = document.createElement('th');
-					ruleHeader.style.width = '90px';
-					ruleHeader.textContent = group.label;
+					ruleHeader.style.width = '120px';
+					const ruleHeaderMeta = document.createElement('div');
+					ruleHeaderMeta.className = 'header-inline';
+					const ruleLabel = document.createElement('span');
+					ruleLabel.textContent = group.label;
+					const count = document.createElement('span');
+					count.className = 'tag';
+					count.textContent = `${group.pairs.length} 对`;
+					ruleHeaderMeta.appendChild(ruleLabel);
+					ruleHeaderMeta.appendChild(count);
+					ruleHeader.appendChild(ruleHeaderMeta);
 
 					const nameHeader = document.createElement('th');
 					nameHeader.textContent = '差分对名';
@@ -1062,16 +1137,18 @@
 					negativeHeader.textContent = '负网络';
 
 					const existHeader = document.createElement('th');
-					existHeader.style.width = '160px';
-					const existHeaderMeta = document.createElement('div');
-					existHeaderMeta.className = 'header-meta';
+					existHeader.style.width = '140px';
+					const existHeaderMeta = document.createElement('button');
+					existHeaderMeta.type = 'button';
+					existHeaderMeta.className = 'sort-toggle';
 					const existLabel = document.createElement('span');
 					existLabel.textContent = '是否已存在';
-					const count = document.createElement('span');
-					count.className = 'tag';
-					count.textContent = `${group.pairs.length} 对`;
+					const indicator = document.createElement('span');
+					indicator.className = 'sort-indicator';
+					indicator.textContent = getExistSortIndicator();
 					existHeaderMeta.appendChild(existLabel);
-					existHeaderMeta.appendChild(count);
+					existHeaderMeta.appendChild(indicator);
+					existHeaderMeta.addEventListener('click', toggleExistSort);
 					existHeader.appendChild(existHeaderMeta);
 
 					headRow.appendChild(toggleHeader);
@@ -1084,7 +1161,8 @@
 
 					const tbody = document.createElement('tbody');
 
-					group.pairs.forEach((pair, index) => {
+					const sortedPairs = getSortedPairs(group.pairs);
+					sortedPairs.forEach((pair, index) => {
 						total += 1;
 						if (pair.existingName) {
 							existCount += 1;
