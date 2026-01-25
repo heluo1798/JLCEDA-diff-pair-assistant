@@ -627,6 +627,11 @@
 					box-shadow 0.25s ease;
 			}
 
+			#loadingText {
+				text-align: center;
+				white-space: pre-line;
+			}
+
 			.spinner {
 				width: 36px;
 				height: 36px;
@@ -743,14 +748,26 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.13';
+			const APP_VERSION = '26.1.16';
 			const STORAGE_KEY = 'diffPairRules';
 			const THEME_KEY = 'diffPairTheme';
 			const DEFAULT_RULES = [
-				{ a: 'P', b: 'N', custom: false },
-				{ a: '+', b: '-', custom: false },
-				{ a: 'H', b: 'L', custom: false },
-				{ a: 'A', b: 'B', custom: false },
+				{ key: 'P1', label: 'P/N', a: 'P', b: 'N', priority: 1 },
+				{ key: 'P2', label: 'P/M', a: 'P', b: 'M', priority: 2 },
+				{ key: 'P3', label: '_H/_L', a: '_H', b: '_L', priority: 3 },
+				{ key: 'P4', label: 'DP/DM', a: 'DP', b: 'DM', priority: 4 },
+				{ key: 'P5', label: '_T/_C', a: '_T', b: '_C', priority: 5 },
+				{ key: 'P6', label: '+/-', a: '+', b: '-', priority: 6 },
+				{ key: 'P7', label: '∅/#', a: '', b: '#', priority: 7 },
+				{ key: 'P8', label: '∅/_B', a: '', b: '_B', priority: 8 },
+				{ key: 'P9', label: '_POS/_NEG', a: '_POS', b: '_NEG', priority: 9 },
+				{
+					key: 'P10',
+					label: '[i]_P/[i]_N',
+					aSuffixes: [/^(.*)\[\d+\]_P$/i, /^(.*)\[\d+\]\+$/i],
+					bSuffixes: [/^(.*)\[\d+\]_N$/i, /^(.*)\[\d+\]-$/i],
+					priority: 10,
+				},
 			];
 
 			const state = {
@@ -879,7 +896,12 @@
 					return parsed
 						.map((item) => normalizeRule(item.a, item.b))
 						.filter((item) => item)
-						.map((item) => ({ ...item, custom: true }));
+						.map((item) => ({
+							...item,
+							custom: true,
+							key: buildCustomRuleKey(item.a, item.b),
+							priority: 1000,
+						}));
 				} catch (error) {
 					return [];
 				}
@@ -899,22 +921,29 @@
 				renderRules();
 			}
 
+			function formatRuleLabel(rule) {
+				if (rule.label) return rule.label;
+				const aText = rule.a ? rule.a : '∅';
+				const bText = rule.b ? rule.b : '∅';
+				return `${aText}/${bText}`;
+			}
+
 			function renderRules() {
 				elements.ruleChips.innerHTML = '';
 				state.rules.forEach((rule) => {
 					const chip = document.createElement('div');
 					chip.className = 'chip';
-					chip.textContent = `${rule.a}/${rule.b}`;
+					chip.textContent = formatRuleLabel(rule);
 					const remove = document.createElement('span');
 					remove.className = 'chip-remove';
 					remove.textContent = '×';
 					remove.addEventListener('click', (event) => {
 						event.stopPropagation();
 						if (rule.custom) {
-							state.customRules = state.customRules.filter((item) => !(item.a === rule.a && item.b === rule.b));
+							state.customRules = state.customRules.filter((item) => item.key !== rule.key);
 							saveCustomRules();
 						} else {
-							state.defaultRules = state.defaultRules.filter((item) => !(item.a === rule.a && item.b === rule.b));
+							state.defaultRules = state.defaultRules.filter((item) => item.key !== rule.key);
 						}
 						refreshRules();
 						scanPairs();
@@ -925,15 +954,20 @@
 			}
 
 			function normalizeRule(a, b) {
-				if (!a || !b) return null;
-				const ra = a.trim();
-				const rb = b.trim();
-				if (!ra || !rb || ra === rb || ra.length !== rb.length) return null;
+				const ra = (a ?? '').trim();
+				const rb = (b ?? '').trim();
+				if (!ra && !rb) return null;
+				if (ra && rb && ra.toLowerCase() === rb.toLowerCase()) return null;
 				return { a: ra, b: rb };
 			}
 
+			function buildCustomRuleKey(a, b) {
+				return `custom:${a.toLowerCase()}|${b.toLowerCase()}`;
+			}
+
 			function hasRule(rule) {
-				return state.rules.some((item) => item.a === rule.a && item.b === rule.b);
+				const key = buildCustomRuleKey(rule.a, rule.b);
+				return state.rules.some((item) => item.key === key);
 			}
 
 			function cleanBaseName(name) {
@@ -988,34 +1022,68 @@
 				await Promise.all(requests);
 			}
 
+			function getRuleMatchers(rule) {
+				const aMatchers = rule.aSuffixes ? [...rule.aSuffixes] : [rule.a ?? ''];
+				const bMatchers = rule.bSuffixes ? [...rule.bSuffixes] : [rule.b ?? ''];
+				return { aMatchers, bMatchers };
+			}
+
+			function matchSuffix(net, matcher) {
+				if (typeof matcher === 'string') {
+					const suffix = matcher;
+					if (!suffix) {
+						return { base: net, baseKey: net.toLowerCase() };
+					}
+					const lowerNet = net.toLowerCase();
+					const lowerSuffix = suffix.toLowerCase();
+					if (!lowerNet.endsWith(lowerSuffix)) return null;
+					const base = net.slice(0, net.length - suffix.length);
+					return { base, baseKey: base.toLowerCase() };
+				}
+				const match = net.match(matcher);
+				if (!match) return null;
+				const base = match[1] ?? '';
+				return { base, baseKey: base.toLowerCase() };
+			}
+
 			function generatePairs(nets) {
 				const pairs = [];
 				const used = new Set();
 				const nameCounts = new Map();
 
 				state.rules.forEach((rule) => {
-					const ruleKey = `${rule.a}|${rule.b}`;
-					const ruleLength = rule.a.length;
-					if (!ruleLength) return;
+					const ruleKey = rule.key;
+					const ruleLabel = formatRuleLabel(rule);
 					const index = new Map();
+					const { aMatchers, bMatchers } = getRuleMatchers(rule);
 
 					nets.forEach((net) => {
-						for (let i = 0; i <= net.length - ruleLength; i += 1) {
-							const segment = net.slice(i, i + ruleLength);
-							if (segment === rule.a || segment === rule.b) {
-								const base = `${net.slice(0, i)}*${net.slice(i + ruleLength)}`;
-								const key = `${ruleKey}|${i}|${base}`;
-								if (!index.has(key)) {
-									index.set(key, { a: [], b: [], base });
-								}
-								const bucket = index.get(key);
-								if (segment === rule.a) {
-									bucket.a.push(net);
-								} else {
-									bucket.b.push(net);
-								}
+						aMatchers.forEach((matcher) => {
+							const matched = matchSuffix(net, matcher);
+							if (!matched) return;
+							const key = `${ruleKey}|${matched.baseKey}`;
+							if (!index.has(key)) {
+								index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: matched.base });
 							}
-						}
+							const bucket = index.get(key);
+							if (!bucket.aSet.has(net)) {
+								bucket.aSet.add(net);
+								bucket.a.push(net);
+							}
+						});
+						bMatchers.forEach((matcher) => {
+							const matched = matchSuffix(net, matcher);
+							if (!matched) return;
+							const key = `${ruleKey}|${matched.baseKey}`;
+							if (!index.has(key)) {
+								index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: matched.base });
+							}
+							const bucket = index.get(key);
+							if (!bucket.bSet.has(net)) {
+								bucket.bSet.add(net);
+								bucket.b.push(net);
+							}
+						});
 					});
 
 					index.forEach((bucket) => {
@@ -1025,11 +1093,12 @@
 								const pairKey = [aNet, bNet].sort().join('||');
 								if (used.has(pairKey)) return;
 								used.add(pairKey);
-								const baseRaw = bucket.base.replace('*', '');
+								const baseRaw = bucket.base;
 								const rawName = cleanBaseName(baseRaw);
-								const count = nameCounts.get(rawName) || 0;
+								const nameKey = rawName.toLowerCase();
+								const count = nameCounts.get(nameKey) || 0;
 								const name = count === 0 ? rawName : `${rawName}_${count + 1}`;
-								nameCounts.set(rawName, count + 1);
+								nameCounts.set(nameKey, count + 1);
 								const existingName = state.existingMap.get(`${aNet}||${bNet}`) || '';
 								pairs.push({
 									id: `${ruleKey}|${aNet}|${bNet}`,
@@ -1037,7 +1106,7 @@
 									positiveNet: aNet,
 									negativeNet: bNet,
 									groupKey: ruleKey,
-									ruleLabel: `${rule.a}/${rule.b}`,
+									ruleLabel,
 									existingName,
 								});
 							});
@@ -1058,7 +1127,7 @@
 				});
 				const ordered = [];
 				state.rules.forEach((rule) => {
-					const key = `${rule.a}|${rule.b}`;
+					const key = rule.key;
 					if (groupMap.has(key)) {
 						ordered.push(groupMap.get(key));
 					}
@@ -1563,23 +1632,47 @@
 					setStatus('未选择任何差分对', 'warning');
 					return;
 				}
-				setLoading(true, '正在写入差分对');
+				const toWrite = selected.filter((pair) => !pair.existingName);
+				const totalWrite = toWrite.length;
 				let success = 0;
-				let skipped = 0;
+				let skipped = selected.length - totalWrite;
 				let failed = 0;
+				const updateWriteLoading = () => {
+					setLoading(true, `正在写入差分对\n${success}/${totalWrite}`);
+				};
 				try {
-					for (const pair of selected) {
-						if (pair.existingName) {
-							skipped += 1;
-							continue;
+					if (!totalWrite) {
+						setStatus(`写入完成：成功 0，跳过 ${skipped}，失败 0`, 'info');
+						return;
+					}
+					updateWriteLoading();
+					const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+					const createPairWithRetry = async (pair) => {
+						for (let attempt = 0; attempt < 3; attempt += 1) {
+							try {
+								const ok = await eda.pcb_Drc.createDifferentialPair(pair.name, pair.positiveNet, pair.negativeNet);
+								if (ok) return true;
+							} catch (error) {
+								if (attempt === 2) throw error;
+							}
+							await wait(40);
 						}
-						const ok = await eda.pcb_Drc.createDifferentialPair(pair.name, pair.positiveNet, pair.negativeNet);
-						if (ok) {
-							success += 1;
-							state.existingMap.set(`${pair.positiveNet}||${pair.negativeNet}`, pair.name);
-							pair.existingName = pair.name;
-						} else {
+						return false;
+					};
+					for (const pair of toWrite) {
+						try {
+							const ok = await createPairWithRetry(pair);
+							if (ok) {
+								success += 1;
+								state.existingMap.set(`${pair.positiveNet}||${pair.negativeNet}`, pair.name);
+								pair.existingName = pair.name;
+							} else {
+								failed += 1;
+							}
+						} catch (error) {
 							failed += 1;
+						} finally {
+							updateWriteLoading();
 						}
 					}
 					const severity = failed > 0 ? 'warning' : success > 0 ? 'success' : 'info';
