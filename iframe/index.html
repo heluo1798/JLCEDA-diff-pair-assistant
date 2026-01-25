@@ -9,6 +9,7 @@
 				color-scheme: light;
 				--bg: #f6f7fb;
 				--card: #ffffff;
+				--glass: rgba(255, 255, 255, 0.78);
 				--text: #0f172a;
 				--muted: #64748b;
 				--primary: #2563eb;
@@ -31,6 +32,7 @@
 				color-scheme: dark;
 				--bg: #0b1220;
 				--card: #0f172a;
+				--glass: rgba(15, 23, 42, 0.72);
 				--text: #e2e8f0;
 				--muted: #94a3b8;
 				--primary: #60a5fa;
@@ -56,7 +58,7 @@
 				font-family:
 					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB',
 					'Microsoft YaHei', sans-serif;
-				background: var(--bg);
+				background: transparent;
 				color: var(--text);
 				overflow: hidden;
 				transition:
@@ -77,9 +79,11 @@
 				align-items: center;
 				justify-content: space-between;
 				padding: 14px 16px;
-				background: var(--card);
+				background: var(--glass);
 				border-radius: 14px;
 				box-shadow: var(--shadow);
+				backdrop-filter: blur(14px);
+				-webkit-backdrop-filter: blur(14px);
 				transition:
 					background-color 0.25s ease,
 					box-shadow 0.25s ease;
@@ -219,13 +223,15 @@
 			}
 
 			.section {
-				background: var(--card);
+				background: var(--glass);
 				border-radius: 14px;
 				padding: 12px 16px;
 				box-shadow: var(--shadow);
 				display: flex;
 				flex-direction: column;
 				gap: 10px;
+				backdrop-filter: blur(14px);
+				-webkit-backdrop-filter: blur(14px);
 				transition:
 					background-color 0.25s ease,
 					box-shadow 0.25s ease;
@@ -310,21 +316,24 @@
 			.rule-chips {
 				display: flex;
 				gap: 8px;
-				flex-wrap: wrap;
+				flex-wrap: nowrap;
 				flex: 1;
 				min-width: 0;
+				overflow-x: auto;
+				overflow-y: hidden;
 			}
 
 			.chip {
-				padding: 6px 26px 6px 10px;
+				padding: 4px 22px 4px 8px;
 				border-radius: 999px;
 				background: var(--chip);
-				font-size: 13px;
+				font-size: 12px;
 				font-weight: 600;
 				color: var(--muted);
 				position: relative;
 				display: inline-flex;
 				align-items: center;
+				white-space: nowrap;
 			}
 
 			.chip .chip-remove {
@@ -353,17 +362,17 @@
 				gap: 8px;
 				align-items: center;
 				background: var(--soft);
-				padding: 8px 10px;
+				padding: 6px 8px;
 				border-radius: 12px;
 				border: 1px solid var(--border);
 			}
 
 			.rule-add input {
 				width: 80px;
-				height: 32px;
+				height: 28px;
 				border-radius: 8px;
 				border: 1px solid var(--border);
-				font-size: 15px;
+				font-size: 14px;
 				text-align: left;
 				padding: 0 8px;
 				font-weight: 600;
@@ -377,7 +386,7 @@
 			}
 
 			.rule-add button {
-				padding: 8px 12px;
+				padding: 6px 10px;
 			}
 
 			.results {
@@ -558,11 +567,13 @@
 				display: flex;
 				align-items: center;
 				justify-content: space-between;
-				background: var(--card);
+				background: var(--glass);
 				border-radius: 14px;
 				padding: 12px 16px;
 				box-shadow: var(--shadow);
 				gap: 16px;
+				backdrop-filter: blur(14px);
+				-webkit-backdrop-filter: blur(14px);
 				transition:
 					background-color 0.25s ease,
 					box-shadow 0.25s ease;
@@ -614,7 +625,7 @@
 			}
 
 			.loading-card {
-				background: var(--card);
+				background: var(--glass);
 				padding: 22px 26px;
 				border-radius: 14px;
 				box-shadow: var(--shadow);
@@ -622,6 +633,8 @@
 				flex-direction: column;
 				align-items: center;
 				gap: 12px;
+				backdrop-filter: blur(14px);
+				-webkit-backdrop-filter: blur(14px);
 				transition:
 					background-color 0.25s ease,
 					box-shadow 0.25s ease;
@@ -748,7 +761,7 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.16';
+			const APP_VERSION = '26.1.17';
 			const STORAGE_KEY = 'diffPairRules';
 			const THEME_KEY = 'diffPairTheme';
 			const DEFAULT_RULES = [
@@ -761,13 +774,6 @@
 				{ key: 'P7', label: '∅/#', a: '', b: '#', priority: 7 },
 				{ key: 'P8', label: '∅/_B', a: '', b: '_B', priority: 8 },
 				{ key: 'P9', label: '_POS/_NEG', a: '_POS', b: '_NEG', priority: 9 },
-				{
-					key: 'P10',
-					label: '[i]_P/[i]_N',
-					aSuffixes: [/^(.*)\[\d+\]_P$/i, /^(.*)\[\d+\]\+$/i],
-					bSuffixes: [/^(.*)\[\d+\]_N$/i, /^(.*)\[\d+\]-$/i],
-					priority: 10,
-				},
 			];
 
 			const state = {
