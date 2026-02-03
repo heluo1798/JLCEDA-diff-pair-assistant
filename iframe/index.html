@@ -1031,14 +1031,46 @@
 					}
 					const lowerNet = net.toLowerCase();
 					const lowerSuffix = suffix.toLowerCase();
-					if (!lowerNet.endsWith(lowerSuffix)) return null;
-					const base = net.slice(0, net.length - suffix.length);
-					return { base, baseKey: base.toLowerCase() };
+					if (lowerNet.endsWith(lowerSuffix)) {
+						const base = net.slice(0, net.length - suffix.length);
+						return { base, baseKey: base.toLowerCase() };
+					}
+					if (lowerNet.startsWith(lowerSuffix)) {
+						const base = net.slice(suffix.length);
+						return { base, baseKey: base.toLowerCase() };
+					}
+					return null;
 				}
 				const match = net.match(matcher);
 				if (!match) return null;
 				const base = match[1] ?? '';
 				return { base, baseKey: base.toLowerCase() };
+			}
+
+			function escapeRegExp(value) {
+				return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+			}
+
+			function normalizeNetByRule(net, rule) {
+				const aText = rule.a ?? '';
+				const bText = rule.b ?? '';
+				const lowerNet = net.toLowerCase();
+				const lowerA = aText.toLowerCase();
+				const lowerB = bText.toLowerCase();
+				const hasA = lowerA && lowerNet.includes(lowerA);
+				const hasB = lowerB && lowerNet.includes(lowerB);
+				if (!hasA && !hasB) return null;
+				const token = '\u0000';
+				const aRegex = new RegExp(escapeRegExp(aText), 'gi');
+				const bRegex = new RegExp(escapeRegExp(bText), 'gi');
+				const normalized = net.replace(aRegex, token).replace(bRegex, token);
+				const base = normalized.split(token).join('');
+				return {
+					normalizedKey: normalized.toLowerCase(),
+					base,
+					hasA,
+					hasB,
+				};
 			}
 
 			function generatePairs(nets) {
@@ -1050,41 +1082,63 @@
 					const ruleKey = rule.key;
 					const ruleLabel = formatRuleLabel(rule);
 					const index = new Map();
-					const { aMatchers, bMatchers } = getRuleMatchers(rule);
+					const useReplaceMatch = !rule.aSuffixes && !rule.bSuffixes && rule.a && rule.b;
 
-					nets.forEach((net) => {
-						aMatchers.forEach((matcher) => {
-							const matched = matchSuffix(net, matcher);
-							if (!matched) return;
-							const key = `${ruleKey}|${matched.baseKey}`;
+					if (useReplaceMatch) {
+						nets.forEach((net) => {
+							const normalized = normalizeNetByRule(net, rule);
+							if (!normalized) return;
+							const key = `${ruleKey}|${normalized.normalizedKey}`;
 							if (!index.has(key)) {
-								index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: matched.base });
+								index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: normalized.base });
 							}
 							const bucket = index.get(key);
-							if (!bucket.aSet.has(net)) {
+							if (normalized.hasA && !bucket.aSet.has(net)) {
 								bucket.aSet.add(net);
 								bucket.a.push(net);
 							}
-						});
-						bMatchers.forEach((matcher) => {
-							const matched = matchSuffix(net, matcher);
-							if (!matched) return;
-							const key = `${ruleKey}|${matched.baseKey}`;
-							if (!index.has(key)) {
-								index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: matched.base });
-							}
-							const bucket = index.get(key);
-							if (!bucket.bSet.has(net)) {
+							if (normalized.hasB && !bucket.bSet.has(net)) {
 								bucket.bSet.add(net);
 								bucket.b.push(net);
 							}
 						});
-					});
+					} else {
+						const { aMatchers, bMatchers } = getRuleMatchers(rule);
+						nets.forEach((net) => {
+							aMatchers.forEach((matcher) => {
+								const matched = matchSuffix(net, matcher);
+								if (!matched) return;
+								const key = `${ruleKey}|${matched.baseKey}`;
+								if (!index.has(key)) {
+									index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: matched.base });
+								}
+								const bucket = index.get(key);
+								if (!bucket.aSet.has(net)) {
+									bucket.aSet.add(net);
+									bucket.a.push(net);
+								}
+							});
+							bMatchers.forEach((matcher) => {
+								const matched = matchSuffix(net, matcher);
+								if (!matched) return;
+								const key = `${ruleKey}|${matched.baseKey}`;
+								if (!index.has(key)) {
+									index.set(key, { a: [], b: [], aSet: new Set(), bSet: new Set(), base: matched.base });
+								}
+								const bucket = index.get(key);
+								if (!bucket.bSet.has(net)) {
+									bucket.bSet.add(net);
+									bucket.b.push(net);
+								}
+							});
+						});
+					}
 
 					index.forEach((bucket) => {
 						if (!bucket.a.length || !bucket.b.length) return;
 						bucket.a.forEach((aNet) => {
 							bucket.b.forEach((bNet) => {
+								if (aNet === bNet) return;
 								const pairKey = [aNet, bNet].sort().join('||');
 								if (used.has(pairKey)) return;
 								used.add(pairKey);

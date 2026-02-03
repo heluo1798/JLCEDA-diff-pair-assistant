@@ -22,7 +22,8 @@
 		"noImplicitThis": true,
 		"useUnknownInCatchVariables": true,
 		"alwaysStrict": true,
-		"isolatedModules": true
+		"isolatedModules": true,
+		"skipLibCheck": true
 	},
 	"include": ["./src/", "./node_modules/@jlceda/pro-api-types/"]
 }
