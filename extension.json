@@ -3,7 +3,7 @@
 	"uuid": "3f48035397a64fb8a96d88da3c3ae48c",
 	"displayName": "差分对雷达",
 	"description": "极速识别 PCB 差分对并一键写入",
-	"version": "26.1.18",
+	"version": "26.4.1",
 	"publisher": "Ocean",
 	"engines": {
 		"eda": "^2.3.0"
@@ -33,6 +33,11 @@
 						"id": "OpenAssistant",
 						"title": "差分对雷达",
 						"registerFn": "openDiffPairAssistant"
+					},
+					{
+						"id": "OpenRuleManager",
+						"title": "差分对规则管理",
+						"registerFn": "openDiffPairRuleManager"
 					}
 				]
 			}

@@ -29,3 +29,11 @@ export function openDiffPairAssistant(): void {
 		grayscaleMask: true,
 	});
 }
+
+export function openDiffPairRuleManager(): void {
+	eda.sys_IFrame.openIFrame('/iframe/rule-manager.html', 800, 600, 'diff-pair-rule-manager', {
+		maximizeButton: true,
+		minimizeButton: true,
+		grayscaleMask: true,
+	});
+}
