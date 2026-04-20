@@ -27,7 +27,6 @@
 				--button-text: #334155;
 				--selected-bg: #e0e7ff;
 			}
-
 			[data-theme='dark'] {
 				color-scheme: dark;
 				--bg: #0b1220;
@@ -47,25 +46,15 @@
 				--button-text: #e2e8f0;
 				--selected-bg: #1e3a5f;
 			}
-
-			* {
-				box-sizing: border-box;
-			}
-
+			* { box-sizing: border-box; }
 			body {
 				margin: 0;
 				height: 100vh;
-				font-family:
-					-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB',
-					'Microsoft YaHei', sans-serif;
+				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 				background: var(--bg);
 				color: var(--text);
 				overflow: hidden;
-				transition:
-					background-color 0.25s ease,
-					color 0.25s ease;
 			}
-
 			.app {
 				display: flex;
 				flex-direction: column;
@@ -73,7 +62,6 @@
 				padding: 20px 24px 28px;
 				gap: 16px;
 			}
-
 			.titlebar {
 				display: flex;
 				align-items: center;
@@ -82,38 +70,11 @@
 				background: var(--card);
 				border-radius: 14px;
 				box-shadow: var(--shadow);
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
 			}
-
-			.titlebar-left {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-			}
-
-			.titlebar-right {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-				color: var(--muted);
-				font-weight: 600;
-				font-size: 13px;
-			}
-
-			.version-badge {
-				padding: 4px 10px;
-				border-radius: 999px;
-				background: var(--tag);
-				color: var(--text);
-				text-decoration: none;
-			}
-
-			.version-link {
-				cursor: pointer;
-			}
-
+			.titlebar-left { display: flex; align-items: center; gap: 12px; }
+			.titlebar-right { display: flex; align-items: center; gap: 12px; color: var(--muted); font-weight: 600; font-size: 13px; }
+			.version-badge { padding: 4px 10px; border-radius: 999px; background: var(--tag); color: var(--text); text-decoration: none; }
+			.version-link { cursor: pointer; }
 			.theme-toggle {
 				display: inline-flex;
 				align-items: center;
@@ -127,67 +88,25 @@
 				color: var(--button-text);
 				position: relative;
 				overflow: hidden;
-				transition:
-					background-color 0.2s ease,
-					color 0.2s ease;
 			}
-
 			.theme-toggle::after {
 				content: '';
 				position: absolute;
 				top: 2px;
 				right: 2px;
-				left: auto;
 				width: 20px;
 				height: 20px;
 				border-radius: 999px;
 				background: var(--text);
-				transition:
-					left 0.2s ease,
-					right 0.2s ease,
-					background-color 0.2s ease;
 			}
-
-			.theme-toggle[data-theme='dark']::after {
-				left: 2px;
-				right: auto;
-			}
-
-			.theme-toggle[data-theme='dark'] {
-				justify-content: flex-end;
-			}
-
-			.window-controls {
-				display: flex;
-				gap: 8px;
-				align-items: center;
-			}
-
-			.window-dot {
-				width: 12px;
-				height: 12px;
-				border-radius: 999px;
-				border: 1px solid rgba(15, 23, 42, 0.08);
-				cursor: pointer;
-			}
-
-			.window-dot.close {
-				background: #ff5f56;
-			}
-
-			.window-dot.minimize {
-				background: #ffbd2e;
-			}
-
-			.window-dot.maximize {
-				background: #27c93f;
-			}
-
-			.title {
-				font-size: 16px;
-				font-weight: 600;
-			}
-
+			.theme-toggle[data-theme='dark']::after { left: 2px; right: auto; }
+			.theme-toggle[data-theme='dark'] { justify-content: flex-end; }
+			.window-controls { display: flex; gap: 8px; align-items: center; }
+			.window-dot { width: 12px; height: 12px; border-radius: 999px; border: 1px solid rgba(15, 23, 42, 0.08); cursor: pointer; }
+			.window-dot.close { background: #ff5f56; }
+			.window-dot.minimize { background: #ffbd2e; }
+			.window-dot.maximize { background: #27c93f; }
+			.title { font-size: 16px; font-weight: 600; }
 			button {
 				border: none;
 				border-radius: 10px;
@@ -199,263 +118,40 @@
 				color: var(--button-text);
 				transition: all 0.2s ease;
 			}
-
-			button:hover {
-				transform: translateY(-1px);
-			}
-
-			button.primary {
-				background: var(--primary);
-				color: var(--primary-contrast);
-				box-shadow: 0 10px 18px rgba(37, 99, 235, 0.22);
-			}
-
-			button:disabled {
-				opacity: 0.5;
-				cursor: not-allowed;
-				transform: none;
-			}
-
-			.section {
-				background: var(--card);
-				border-radius: 14px;
-				padding: 12px 16px;
-				box-shadow: var(--shadow);
-				display: flex;
-				flex-direction: column;
-				gap: 10px;
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
-			}
-
-			.filter-bar {
-				display: flex;
-				gap: 12px;
-				align-items: center;
-			}
-
-			.filter-input {
-				flex: 1;
-				height: 36px;
-				border-radius: 10px;
-				border: 1px solid var(--border);
-				padding: 0 12px;
-				font-size: 14px;
-				font-weight: 600;
-				background: var(--card);
-				color: var(--text);
-			}
-
-			.filter-input:focus {
-				outline: none;
-				border-color: var(--primary);
-				box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
-			}
-
-			.filter-select {
-				height: 36px;
-				border-radius: 10px;
-				border: 1px solid var(--border);
-				padding: 0 12px;
-				font-size: 14px;
-				font-weight: 600;
-				background: var(--card);
-				color: var(--text);
-				min-width: 150px;
-			}
-
-			.results {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-				flex: 1;
-				min-height: 0;
-			}
-
-			.result-list {
-				flex: 1;
-				min-height: 0;
-				overflow: auto;
-				padding-right: 4px;
-			}
-
-			.table {
-				width: 100%;
-				border-collapse: collapse;
-				font-size: 13px;
-			}
-
-			.table thead th {
-				text-align: left;
-				padding: 10px 8px;
-				background: var(--table-head);
-				color: var(--muted);
-				font-weight: 600;
-				border-bottom: 1px solid var(--border);
-				position: sticky;
-				top: 0;
-				z-index: 2;
-			}
-
-			.table tbody td {
-				padding: 8px;
-				border-bottom: 1px solid var(--border);
-				vertical-align: middle;
-			}
-
-			.table tbody tr:hover {
-				background: var(--table-hover);
-			}
-
-			.table tbody tr.selected {
-				background: var(--selected-bg);
-			}
-
-			.cell-name {
-				font-weight: 600;
-			}
-
-			.cell-muted {
-				color: var(--muted);
-			}
-
-			.rule-select {
-				height: 32px;
-				border-radius: 8px;
-				border: 1px solid var(--border);
-				padding: 0 8px;
-				font-size: 13px;
-				font-weight: 600;
-				background: var(--card);
-				color: var(--text);
-				width: 100%;
-				min-width: 120px;
-			}
-
-			.footer {
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				background: var(--card);
-				border-radius: 14px;
-				padding: 12px 16px;
-				box-shadow: var(--shadow);
-				gap: 16px;
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
-			}
-
-			.status {
-				color: var(--muted);
-				font-size: 13px;
-				display: inline-flex;
-				align-items: center;
-				gap: 6px;
-			}
-
-			.status-error {
-				color: var(--danger);
-			}
-
-			.status-warning {
-				color: var(--warning);
-			}
-
-			.status-info {
-				color: var(--primary);
-			}
-
-			.status-success {
-				color: var(--success);
-			}
-
-			.actions {
-				display: flex;
-				align-items: center;
-				gap: 12px;
-			}
-
-			.batch-select {
-				height: 36px;
-				border-radius: 10px;
-				border: 1px solid var(--border);
-				padding: 0 12px;
-				font-size: 14px;
-				font-weight: 600;
-				background: var(--card);
-				color: var(--text);
-				min-width: 180px;
-			}
-
-			.loading {
-				position: fixed;
-				inset: 0;
-				display: none;
-				align-items: center;
-				justify-content: center;
-				background: rgba(15, 23, 42, 0.2);
-				backdrop-filter: blur(6px);
-				z-index: 999;
-			}
-
-			.loading.active {
-				display: flex;
-			}
-
-			.loading-card {
-				background: var(--card);
-				padding: 22px 26px;
-				border-radius: 14px;
-				box-shadow: var(--shadow);
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				gap: 12px;
-				transition:
-					background-color 0.25s ease,
-					box-shadow 0.25s ease;
-			}
-
-			#loadingText {
-				text-align: center;
-				white-space: pre-line;
-			}
-
-			.spinner {
-				width: 36px;
-				height: 36px;
-				border-radius: 999px;
-				border: 4px solid var(--border);
-				border-top-color: var(--primary);
-				animation: spin 0.9s linear infinite;
-			}
-
-			.icon-button {
-				width: 26px;
-				height: 26px;
-				border-radius: 999px;
-				padding: 0;
-				display: inline-flex;
-				align-items: center;
-				justify-content: center;
-				background: var(--tag);
-				color: var(--text);
-				font-size: 14px;
-			}
-
-			.hint {
-				font-size: 12px;
-				color: var(--muted);
-				font-weight: 600;
-			}
-
-			@keyframes spin {
-				to {
-					transform: rotate(360deg);
-				}
-			}
+			button:hover { transform: translateY(-1px); }
+			button.primary { background: var(--primary); color: var(--primary-contrast); box-shadow: 0 10px 18px rgba(37, 99, 235, 0.22); }
+			button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+			.section { background: var(--card); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; }
+			.filter-bar { display: flex; gap: 12px; align-items: center; }
+			.filter-input { flex: 1; height: 36px; border-radius: 10px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; font-weight: 600; background: var(--card); color: var(--text); }
+			.filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12); }
+			.filter-select { height: 36px; border-radius: 10px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; font-weight: 600; background: var(--card); color: var(--text); min-width: 150px; }
+			.results { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
+			.result-list { flex: 1; min-height: 0; overflow: auto; padding-right: 4px; }
+			.table { width: 100%; border-collapse: collapse; font-size: 13px; }
+			.table thead th { text-align: left; padding: 10px 8px; background: var(--table-head); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
+			.table tbody td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+			.table tbody tr:hover { background: var(--table-hover); }
+			.table tbody tr.selected { background: var(--selected-bg); }
+			.cell-name { font-weight: 600; }
+			.cell-muted { color: var(--muted); }
+			.rule-select { height: 32px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px; font-weight: 600; background: var(--card); color: var(--text); width: 100%; min-width: 120px; }
+			.footer { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow); gap: 16px; }
+			.status { color: var(--muted); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+			.status-error { color: var(--danger); }
+			.status-warning { color: var(--warning); }
+			.status-info { color: var(--primary); }
+			.status-success { color: var(--success); }
+			.actions { display: flex; align-items: center; gap: 12px; }
+			.batch-select { height: 36px; border-radius: 10px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; font-weight: 600; background: var(--card); color: var(--text); min-width: 180px; }
+			.loading { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.2); backdrop-filter: blur(6px); z-index: 999; }
+			.loading.active { display: flex; }
+			.loading-card { background: var(--card); padding: 22px 26px; border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+			#loadingText { text-align: center; white-space: pre-line; }
+			.spinner { width: 36px; height: 36px; border-radius: 999px; border: 4px solid var(--border); border-top-color: var(--primary); animation: spin 0.9s linear infinite; }
+			.icon-button { width: 26px; height: 26px; border-radius: 999px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--tag); color: var(--text); font-size: 14px; }
+			.hint { font-size: 12px; color: var(--muted); font-weight: 600; }
+			@keyframes spin { to { transform: rotate(360deg); } }
 		</style>
 	</head>
 	<body>
@@ -471,27 +167,18 @@
 					<button class="theme-toggle" id="themeToggle">浅色</button>
 				</div>
 				<div class="titlebar-right">
-					<a
-						class="version-badge version-link"
-						id="versionLink"
-						href="https://ext.lceda.cn/item/zero1798/diff-pair-assistant"
-						target="_blank"
-						rel="noopener noreferrer"
-					></a>
+					<a class="version-badge version-link" id="versionLink" href="https://ext.lceda.cn/item/zero1798/diff-pair-assistant" target="_blank" rel="noopener noreferrer"></a>
 				</div>
 			</header>
-
 			<section class="section">
 				<div class="filter-bar">
 					<input class="filter-input" id="filterInput" placeholder="搜索差分对名..." />
 					<select class="filter-select" id="ruleFilter">
 						<option value="all">全部规则</option>
-						<option value="unset">未设置规则</option>
 					</select>
 					<button id="refreshBtn">刷新</button>
 				</div>
 			</section>
-
 			<section class="section results">
 				<div class="result-list" id="resultList">
 					<table class="table">
@@ -507,11 +194,10 @@
 						<tbody id="tableBody"></tbody>
 					</table>
 				</div>
-				<div class="hint">💡 提示: Shift+点击可范围选择，Ctrl+点击可多选非连续行</div>
+				<div class="hint">提示: Shift+点击可范围选择，Ctrl+点击可多选非连续行</div>
 			</section>
-
 			<footer class="footer">
-				<div class="status status-info" id="statusText">❔ 等待加载</div>
+				<div class="status status-info" id="statusText">等待加载</div>
 				<div class="actions">
 					<span id="selectedCount" class="status">已选 0 对</span>
 					<select class="batch-select" id="batchRuleSelect" disabled>
@@ -522,28 +208,28 @@
 				</div>
 			</footer>
 		</div>
-
 		<div class="loading" id="loading">
 			<div class="loading-card">
 				<div class="spinner"></div>
 				<div id="loadingText">正在加载差分对</div>
 			</div>
 		</div>
-
 		<script>
-			const APP_VERSION = '26.4.1';
+			const APP_VERSION = '26.4.5';
 			const THEME_KEY = 'diffPairRuleManagerTheme';
-
+			const DIFF_PAIR_RULE_TYPE = 'Differential Pair';
 			const state = {
 				pairs: [],
 				rules: [],
-				ruleBindings: new Map(),
+				defaultRuleName: null,
+				regionRules: [],
+				pairBindings: new Map(),
+				pendingChanges: new Map(),
 				selectedPairIds: new Set(),
 				lastSelectedIndex: null,
 				filterText: '',
 				filterRule: 'all',
 			};
-
 			const elements = {
 				filterInput: document.getElementById('filterInput'),
 				ruleFilter: document.getElementById('ruleFilter'),
@@ -560,39 +246,25 @@
 				themeToggle: document.getElementById('themeToggle'),
 				versionLink: document.getElementById('versionLink'),
 			};
-
 			const isIFrameContext = Boolean(window.parent && window.parent !== window && window.parent.eda);
 			const windowControls = document.querySelector('.window-controls');
-			if (!isIFrameContext && windowControls) {
-				windowControls.style.display = 'none';
-			}
-
+			if (!isIFrameContext && windowControls) windowControls.style.display = 'none';
 			function getEda() {
 				if (window.eda) return window.eda;
 				if (window.parent && window.parent.eda) return window.parent.eda;
 				if (window.opener && window.opener.eda) return window.opener.eda;
 				return null;
 			}
-
 			function setLoading(active, text) {
 				elements.loading.classList.toggle('active', active);
 				if (text) elements.loadingText.textContent = text;
 			}
-
 			function setStatus(text, severity = 'info') {
-				const statusMap = {
-					error: { icon: '❌' },
-					warning: { icon: '⚠️' },
-					info: { icon: '❔' },
-					success: { icon: '✅' },
-				};
-				const safeSeverity = statusMap[severity] ? severity : 'info';
-				const { icon } = statusMap[safeSeverity];
-				elements.statusText.textContent = `${icon} ${text}`;
-				elements.statusText.classList.remove('status-error', 'status-warning', 'status-info', 'status-success');
-				elements.statusText.classList.add(`status-${safeSeverity}`);
+				const icons = { error: 'X', warning: '!', info: '?', success: 'OK' };
+				const safeSeverity = icons[severity] ? severity : 'info';
+				elements.statusText.textContent = `${icons[safeSeverity]} ${text}`;
+				elements.statusText.className = `status status-${safeSeverity}`;
 			}
-
 			function setTheme(theme) {
 				const safeTheme = theme === 'dark' ? 'dark' : 'light';
 				document.documentElement.setAttribute('data-theme', safeTheme);
@@ -602,335 +274,262 @@
 					elements.themeToggle.setAttribute('data-theme', safeTheme);
 				}
 			}
-
 			function toggleTheme() {
-				const current = document.documentElement.getAttribute('data-theme') || 'light';
-				setTheme(current === 'dark' ? 'light' : 'dark');
+				setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
 			}
-
-			function initTheme() {
-				const stored = localStorage.getItem(THEME_KEY);
-				setTheme(stored === 'dark' ? 'dark' : 'light');
+			function initTheme() { setTheme(localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'); }
+			function normalizePairsData(pairsData) {
+				if (!pairsData) return [];
+				if (Array.isArray(pairsData)) return pairsData;
+				if (typeof pairsData === 'object') {
+					const pairs = [];
+					Object.keys(pairsData).forEach((key) => {
+						const item = pairsData[key];
+						if (item && typeof item === 'object') {
+							pairs.push({
+								name: item.name || key,
+								positiveNet: item.positiveNet || item.positive || '',
+								negativeNet: item.negativeNet || item.negative || '',
+							});
+						}
+					});
+					return pairs;
+				}
+				return [];
 			}
-
 			function parseRuleConfig(ruleConfig) {
 				const rules = [];
-				if (!ruleConfig) return rules;
-
-				console.log('ruleConfig:', JSON.stringify(ruleConfig, null, 2));
-
+				let defaultRuleName = null;
+				if (!ruleConfig) return { rules, defaultRuleName };
 				const config = ruleConfig.config || ruleConfig;
-				const diffPairRules = config['Differential Pair'] || config.DifferentialPair || {};
-
-				Object.keys(diffPairRules).forEach((ruleName) => {
-					if (ruleName && typeof diffPairRules[ruleName] === 'object') {
-						rules.push({
-							name: ruleName,
-							context: diffPairRules[ruleName],
-						});
-					}
-				});
-
-				if (rules.length === 0) {
-					rules.push({ name: 'default', context: {} });
-				}
-
-				console.log('parsed rules:', rules);
-				return rules;
-			}
-
-			function parseRuleBindings(netByNetRules) {
-				const bindings = new Map();
-				if (!netByNetRules) return bindings;
-
-				console.log('netByNetRules:', JSON.stringify(netByNetRules, null, 2));
-
-				Object.keys(netByNetRules).forEach((key) => {
-					const rule = netByNetRules[key];
-					if (rule && rule.type === 'diffPair' || rule.type === 'DIFF_PAIR') {
-						const pairName = rule.name || key;
-						const ruleName = rule['Differential Pair'] || rule.differentialPair || 'default';
-						bindings.set(pairName, ruleName);
-					}
-				});
-
-				if (Array.isArray(netByNetRules)) {
-					netByNetRules.forEach((rule) => {
-						if (rule.type === 'diffPair' || rule.type === 'DIFF_PAIR') {
-							const pairName = rule.name;
-							const ruleName = rule['Differential Pair'] || rule.differentialPair || 'default';
-							bindings.set(pairName, ruleName);
+				const physics = config.Physics || {};
+				const diffPairRules = physics['Differential Pair'] || physics[DIFF_PAIR_RULE_TYPE] || {};
+				if (typeof diffPairRules === 'object' && diffPairRules !== null) {
+					Object.keys(diffPairRules).forEach((ruleName) => {
+						const ruleObj = diffPairRules[ruleName];
+						if (ruleObj && typeof ruleObj === 'object') {
+							const isDefault = ruleObj.ruleState === 1;
+							if (isDefault) defaultRuleName = ruleName;
+							rules.push({ name: ruleName, context: ruleObj.ruleContext || ruleObj.form || {}, isDefault });
 						}
 					});
 				}
-
-				console.log('parsed bindings:', bindings);
+				return { rules, defaultRuleName };
+			}
+			function parseRegionRules(regionRules) {
+				const bindings = new Map();
+				if (!Array.isArray(regionRules)) return bindings;
+				regionRules.forEach((rule) => {
+					if (rule.ruleSelect && Array.isArray(rule.ruleSelect)) {
+						const selectorType = rule.ruleSelect[0];
+						const selectorValue = rule.ruleSelect[1];
+						if (selectorType === 'DIFF_PAIR' && selectorValue) {
+							const ruleName = rule.ruleKeyValue ? rule.ruleKeyValue[DIFF_PAIR_RULE_TYPE] : null;
+							bindings.set(selectorValue, ruleName);
+						}
+					}
+				});
 				return bindings;
 			}
-
+			function formatRuleName(ruleName, isDefault) {
+				return isDefault ? `${ruleName} [默认]` : ruleName;
+			}
 			async function loadData() {
 				const eda = getEda();
-				if (!eda) {
-					setStatus('未检测到 EDA 环境', 'error');
-					return;
-				}
-
+				if (!eda) { setStatus('未检测到 EDA 环境', 'error'); return; }
 				setLoading(true, '正在加载差分对');
 				try {
-					const pairs = await eda.pcb_Drc.getAllDifferentialPairs();
+					const pairsData = await eda.pcb_Drc.getAllDifferentialPairs();
+					state.pairs = normalizePairsData(pairsData);
 					const ruleConfig = await eda.pcb_Drc.getCurrentRuleConfiguration();
-					const netByNetRules = await eda.pcb_Drc.getNetByNetRules();
-
-					console.log('pairs:', pairs);
-					console.log('ruleConfig:', ruleConfig);
-					console.log('netByNetRules:', netByNetRules);
-
-					state.pairs = pairs || [];
-					state.rules = parseRuleConfig(ruleConfig);
-					state.ruleBindings = parseRuleBindings(netByNetRules);
-
+					const parsed = parseRuleConfig(ruleConfig);
+					state.rules = parsed.rules;
+					state.defaultRuleName = parsed.defaultRuleName;
+					const regionRules = await eda.pcb_Drc.getRegionRules();
+					state.regionRules = regionRules || [];
+					state.pairBindings = parseRegionRules(state.regionRules);
+					state.pairs.forEach((pair) => {
+						if (!state.pairBindings.has(pair.name)) {
+							state.pairBindings.set(pair.name, state.defaultRuleName);
+						}
+					});
+					state.pendingChanges.clear();
 					renderRuleFilter();
 					renderBatchRuleSelect();
 					renderTable();
 					updateSelectAllState();
 					updateBatchActions();
-
-					setStatus(`加载完成，共 ${state.pairs.length} 对`, 'success');
+					setStatus(`加载完成，共 ${state.pairs.length} 对，${state.rules.length} 个规则`, 'success');
 				} catch (error) {
 					console.error('loadData error:', error);
 					setStatus('加载失败: ' + (error.message || error), 'error');
-				} finally {
-					setLoading(false);
-				}
+				} finally { setLoading(false); }
 			}
-
 			function renderRuleFilter() {
-				const existingOptions = Array.from(elements.ruleFilter.options).map((o) => o.value);
-				
-				if (!existingOptions.includes('unset')) {
-					const option = document.createElement('option');
-					option.value = 'unset';
-					option.textContent = '未设置规则';
-					elements.ruleFilter.appendChild(option);
-				}
-
+				elements.ruleFilter.innerHTML = '<option value="all">全部规则</option>';
 				state.rules.forEach((rule) => {
-					if (!existingOptions.includes(rule.name)) {
-						const option = document.createElement('option');
-						option.value = rule.name;
-						option.textContent = rule.name;
-						elements.ruleFilter.appendChild(option);
-					}
+					const opt = document.createElement('option');
+					opt.value = rule.name;
+					opt.textContent = formatRuleName(rule.name, rule.isDefault);
+					elements.ruleFilter.appendChild(opt);
 				});
 			}
-
 			function renderBatchRuleSelect() {
 				elements.batchRuleSelect.innerHTML = '<option value="">选择规则</option>';
 				state.rules.forEach((rule) => {
-					const option = document.createElement('option');
-					option.value = rule.name;
-					option.textContent = rule.name;
-					elements.batchRuleSelect.appendChild(option);
+					const opt = document.createElement('option');
+					opt.value = rule.name;
+					opt.textContent = formatRuleName(rule.name, rule.isDefault);
+					elements.batchRuleSelect.appendChild(opt);
 				});
 			}
-
 			function getFilteredPairs() {
 				return state.pairs.filter((pair) => {
-					if (state.filterText && !pair.name.toLowerCase().includes(state.filterText.toLowerCase())) {
-						return false;
-					}
-					if (state.filterRule === 'unset') {
-						const binding = state.ruleBindings.get(pair.name);
-						return !binding || binding === '未设置';
-					}
-					if (state.filterRule !== 'all') {
-						const binding = state.ruleBindings.get(pair.name);
-						return binding === state.filterRule;
-					}
+					if (state.filterText && !pair.name.toLowerCase().includes(state.filterText.toLowerCase())) return false;
+					const currentRule = state.pairBindings.get(pair.name) || state.defaultRuleName;
+					if (state.filterRule !== 'all') return currentRule === state.filterRule;
 					return true;
 				});
 			}
-
 			function renderTable() {
 				const filtered = getFilteredPairs();
 				elements.tableBody.innerHTML = '';
-
 				filtered.forEach((pair, index) => {
 					const row = document.createElement('tr');
 					row.dataset.pairName = pair.name;
 					row.dataset.index = index;
-					if (state.selectedPairIds.has(pair.name)) {
-						row.classList.add('selected');
-					}
-
+					if (state.selectedPairIds.has(pair.name)) row.classList.add('selected');
 					const checkbox = document.createElement('input');
 					checkbox.type = 'checkbox';
 					checkbox.checked = state.selectedPairIds.has(pair.name);
 					checkbox.dataset.pairName = pair.name;
 					checkbox.dataset.index = index;
-
 					const checkboxCell = document.createElement('td');
 					checkboxCell.appendChild(checkbox);
-
 					const nameCell = document.createElement('td');
 					nameCell.className = 'cell-name';
 					nameCell.textContent = pair.name;
-
 					const positiveCell = document.createElement('td');
 					positiveCell.textContent = pair.positiveNet;
-
 					const negativeCell = document.createElement('td');
 					negativeCell.textContent = pair.negativeNet;
-
 					const ruleCell = document.createElement('td');
 					const ruleSelect = document.createElement('select');
 					ruleSelect.className = 'rule-select';
 					ruleSelect.dataset.pairName = pair.name;
-
-					const defaultOption = document.createElement('option');
-					defaultOption.value = '';
-					defaultOption.textContent = '未设置';
-					ruleSelect.appendChild(defaultOption);
-
 					state.rules.forEach((rule) => {
-						const option = document.createElement('option');
-						option.value = rule.name;
-						option.textContent = rule.name;
-						ruleSelect.appendChild(option);
+						const opt = document.createElement('option');
+						opt.value = rule.name;
+						opt.textContent = formatRuleName(rule.name, rule.isDefault);
+						ruleSelect.appendChild(opt);
 					});
-
-					const currentBinding = state.ruleBindings.get(pair.name) || '';
-					ruleSelect.value = currentBinding;
-
+					const currentBinding = state.pairBindings.get(pair.name) || state.defaultRuleName;
+					const pendingRule = state.pendingChanges.get(pair.name);
+					const selectedRule = pendingRule !== undefined ? pendingRule : currentBinding;
+					if (state.rules.some(r => r.name === selectedRule)) {
+						ruleSelect.value = selectedRule;
+					} else if (state.rules.length > 0) {
+						ruleSelect.value = state.defaultRuleName || state.rules[0].name;
+					}
+					if (pendingRule !== undefined && pendingRule !== currentBinding) {
+						row.style.borderLeft = '3px solid var(--warning)';
+						ruleSelect.style.fontWeight = '800';
+					}
 					ruleCell.appendChild(ruleSelect);
-
 					row.appendChild(checkboxCell);
 					row.appendChild(nameCell);
 					row.appendChild(positiveCell);
 					row.appendChild(negativeCell);
 					row.appendChild(ruleCell);
-
 					elements.tableBody.appendChild(row);
 				});
 			}
-
 			function updateSelectAllState() {
 				const filtered = getFilteredPairs();
-				const selectedInFiltered = filtered.filter((p) => state.selectedPairIds.has(p.name)).length;
-
-				elements.selectAll.checked = selectedInFiltered === filtered.length && filtered.length > 0;
-				elements.selectAll.indeterminate = selectedInFiltered > 0 && selectedInFiltered < filtered.length;
+				const selected = filtered.filter((p) => state.selectedPairIds.has(p.name)).length;
+				elements.selectAll.checked = selected === filtered.length && filtered.length > 0;
+				elements.selectAll.indeterminate = selected > 0 && selected < filtered.length;
 			}
-
 			function updateBatchActions() {
 				const count = state.selectedPairIds.size;
-				elements.selectedCount.textContent = `已选 ${count} 对`;
+				const hasPending = state.pendingChanges.size > 0;
+				elements.selectedCount.textContent = `已选 ${count} 对${hasPending ? `，${state.pendingChanges.size} 对待应用` : ''}`;
 				elements.batchRuleSelect.disabled = count === 0;
-				elements.applyBtn.disabled = count === 0;
+				elements.applyBtn.disabled = state.pendingChanges.size === 0;
 			}
-
 			function toggleSelection(pairName, index, shiftKey, ctrlKey) {
+				const filtered = getFilteredPairs();
 				if (shiftKey && state.lastSelectedIndex !== null) {
-					const filtered = getFilteredPairs();
 					const start = Math.min(state.lastSelectedIndex, index);
 					const end = Math.max(state.lastSelectedIndex, index);
-					for (let i = start; i <= end; i++) {
-						if (filtered[i]) {
-							state.selectedPairIds.add(filtered[i].name);
-						}
-					}
+					for (let i = start; i <= end; i++) if (filtered[i]) state.selectedPairIds.add(filtered[i].name);
 				} else if (ctrlKey) {
-					if (state.selectedPairIds.has(pairName)) {
-						state.selectedPairIds.delete(pairName);
-					} else {
-						state.selectedPairIds.add(pairName);
-					}
+					state.selectedPairIds.has(pairName) ? state.selectedPairIds.delete(pairName) : state.selectedPairIds.add(pairName);
 					state.lastSelectedIndex = index;
 				} else {
 					state.selectedPairIds.clear();
 					state.selectedPairIds.add(pairName);
 					state.lastSelectedIndex = index;
 				}
-
 				renderTable();
 				updateSelectAllState();
 				updateBatchActions();
 			}
-
 			function bindEvents() {
-				elements.selectAll.addEventListener('change', (event) => {
+				elements.selectAll.addEventListener('change', (e) => {
 					const filtered = getFilteredPairs();
-					if (event.target.checked) {
-						filtered.forEach((p) => state.selectedPairIds.add(p.name));
-					} else {
-						state.selectedPairIds.clear();
-					}
+					e.target.checked ? filtered.forEach((p) => state.selectedPairIds.add(p.name)) : state.selectedPairIds.clear();
 					renderTable();
 					updateBatchActions();
 				});
-
-				elements.tableBody.addEventListener('click', (event) => {
-					const checkbox = event.target.closest('input[type="checkbox"]');
+				elements.tableBody.addEventListener('click', (e) => {
+					if (e.target.closest('select') || e.target.closest('option')) return;
+					const checkbox = e.target.closest('input[type="checkbox"]');
 					if (checkbox) {
-						const pairName = checkbox.dataset.pairName;
-						const index = parseInt(checkbox.dataset.index, 10);
-						toggleSelection(pairName, index, event.shiftKey, event.ctrlKey || event.metaKey);
+						toggleSelection(checkbox.dataset.pairName, parseInt(checkbox.dataset.index, 10), e.shiftKey, e.ctrlKey || e.metaKey);
 						return;
 					}
-
-					const row = event.target.closest('tr');
-					if (row) {
-						const pairName = row.dataset.pairName;
-						const index = parseInt(row.dataset.index, 10);
-						toggleSelection(pairName, index, event.shiftKey, event.ctrlKey || event.metaKey);
-					}
+					const row = e.target.closest('tr');
+					if (row) toggleSelection(row.dataset.pairName, parseInt(row.dataset.index, 10), e.shiftKey, e.ctrlKey || e.metaKey);
 				});
-
-				elements.tableBody.addEventListener('change', (event) => {
-					if (event.target.classList.contains('rule-select')) {
-						const pairName = event.target.dataset.pairName;
-						const ruleName = event.target.value;
-						if (ruleName) {
-							state.ruleBindings.set(pairName, ruleName);
+				elements.tableBody.addEventListener('change', (e) => {
+					if (e.target.classList.contains('rule-select')) {
+						const pairName = e.target.dataset.pairName;
+						const ruleName = e.target.value;
+						const currentBinding = state.pairBindings.get(pairName) || state.defaultRuleName;
+						if (ruleName === currentBinding) {
+							state.pendingChanges.delete(pairName);
 						} else {
-							state.ruleBindings.set(pairName, '未设置');
+							state.pendingChanges.set(pairName, ruleName);
 						}
+						renderTable();
+						updateBatchActions();
 					}
 				});
-
-				elements.filterInput.addEventListener('input', (event) => {
-					state.filterText = event.target.value;
+				elements.filterInput.addEventListener('input', (e) => {
+					state.filterText = e.target.value;
 					state.selectedPairIds.clear();
 					state.lastSelectedIndex = null;
 					renderTable();
 					updateSelectAllState();
 					updateBatchActions();
 				});
-
-				elements.ruleFilter.addEventListener('change', (event) => {
-					state.filterRule = event.target.value;
+				elements.ruleFilter.addEventListener('change', (e) => {
+					state.filterRule = e.target.value;
 					state.selectedPairIds.clear();
 					state.lastSelectedIndex = null;
 					renderTable();
 					updateSelectAllState();
 					updateBatchActions();
 				});
-
 				elements.refreshBtn.addEventListener('click', () => loadData());
-
-				elements.batchRuleSelect.addEventListener('change', (event) => {
-					const ruleName = event.target.value;
-					if (!ruleName) return;
-
-					state.selectedPairIds.forEach((pairName) => {
-						state.ruleBindings.set(pairName, ruleName);
-					});
-
+				elements.batchRuleSelect.addEventListener('change', (e) => {
+					if (!e.target.value) return;
+					state.selectedPairIds.forEach((pairName) => state.pendingChanges.set(pairName, e.target.value));
 					renderTable();
+					updateBatchActions();
 				});
-
 				elements.applyBtn.addEventListener('click', async () => applyRules());
-
 				elements.clearSelectionBtn.addEventListener('click', () => {
 					state.selectedPairIds.clear();
 					state.lastSelectedIndex = null;
@@ -938,72 +537,58 @@
 					updateSelectAllState();
 					updateBatchActions();
 				});
-
-				if (elements.themeToggle) {
-					elements.themeToggle.addEventListener('click', toggleTheme);
-				}
-
-				const controlButtons = document.querySelectorAll('.window-dot');
-				controlButtons.forEach((button) => {
-					button.addEventListener('click', () => {
-						const action = button.dataset.action;
+				if (elements.themeToggle) elements.themeToggle.addEventListener('click', toggleTheme);
+				document.querySelectorAll('.window-dot').forEach((btn) => {
+					btn.addEventListener('click', () => {
+						const action = btn.dataset.action;
 						const eda = getEda();
 						if (action === 'close') {
-							if (isIFrameContext && eda?.sys_IFrame?.closeIFrame) {
-								eda.sys_IFrame.closeIFrame('diff-pair-rule-manager');
-							} else {
-								window.close();
-							}
-						} else if (action === 'minimize') {
-							if (isIFrameContext && eda?.sys_IFrame?.hideIFrame) {
-								eda.sys_IFrame.hideIFrame('diff-pair-rule-manager');
-							}
-						} else if (action === 'maximize') {
-							if (isIFrameContext && eda?.sys_IFrame?.showIFrame) {
-								eda.sys_IFrame.showIFrame('diff-pair-rule-manager');
-							}
+							if (isIFrameContext && eda?.sys_IFrame?.closeIFrame) eda.sys_IFrame.closeIFrame('diff-pair-rule-manager');
+							else window.close();
+						} else if (action === 'minimize' && isIFrameContext && eda?.sys_IFrame?.hideIFrame) {
+							eda.sys_IFrame.hideIFrame('diff-pair-rule-manager');
+						} else if (action === 'maximize' && isIFrameContext && eda?.sys_IFrame?.showIFrame) {
+							eda.sys_IFrame.showIFrame('diff-pair-rule-manager');
 						}
 					});
 				});
 			}
-
 			async function applyRules() {
 				const eda = getEda();
-				if (!eda) {
-					setStatus('未检测到 EDA 环境', 'error');
-					return;
-				}
-
+				if (!eda) { setStatus('未检测到 EDA 环境', 'error'); return; }
+				if (state.pendingChanges.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
 				setLoading(true, '正在应用规则');
 				try {
-					const ruleConfig = await eda.pcb_Drc.getCurrentRuleConfiguration();
-					if (!ruleConfig) {
-						setStatus('获取规则配置失败', 'error');
-						return;
-					}
-
-					const ruleContext = ruleConfig.ruleContext || {};
-					const selectors = ruleContext.ruleSelectors || ruleContext.selectors || [];
-
-					const newSelectors = selectors.filter((s) => !(s.ruleSelect && s.ruleSelect[0] === 'DIFF_PAIR'));
-
-					state.ruleBindings.forEach((ruleName, pairName) => {
-						if (ruleName && ruleName !== '未设置') {
-							newSelectors.push({
-								ruleSelect: ['DIFF_PAIR', pairName],
-								ruleOrder: 4,
-								ruleKeyValue: { 'Differential Pair': ruleName },
-							});
+					let regionRules = await eda.pcb_Drc.getRegionRules();
+					if (!Array.isArray(regionRules)) regionRules = [];
+					const existingPairRules = new Map();
+					regionRules.forEach((rule, index) => {
+						if (rule.ruleSelect && Array.isArray(rule.ruleSelect) && rule.ruleSelect[0] === 'DIFF_PAIR') {
+							existingPairRules.set(rule.ruleSelect[1], index);
 						}
 					});
-
-					ruleContext.ruleSelectors = newSelectors;
-					ruleContext.selectors = newSelectors;
-
-					const success = await eda.pcb_Drc.overwriteCurrentRuleConfiguration(ruleConfig);
-
+					let appliedCount = 0;
+					for (const [pairName, targetRuleName] of state.pendingChanges) {
+						const pair = state.pairs.find((p) => p.name === pairName);
+						if (!pair) continue;
+						const existingIndex = existingPairRules.get(pairName);
+						if (existingIndex !== undefined) {
+							const existingRule = regionRules[existingIndex];
+							existingRule.ruleKeyValue = { ...existingRule.ruleKeyValue, [DIFF_PAIR_RULE_TYPE]: targetRuleName };
+						} else {
+							const newRule = {
+								ruleSelect: ['DIFF_PAIR', pairName],
+								ruleOrder: 4,
+								ruleKeyValue: { [DIFF_PAIR_RULE_TYPE]: targetRuleName },
+							};
+							regionRules.push(newRule);
+						}
+						appliedCount++;
+					}
+					const success = await eda.pcb_Drc.overwriteRegionRules(regionRules);
 					if (success) {
-						setStatus(`成功应用 ${state.selectedPairIds.size} 对规则`, 'success');
+						setStatus(`成功应用 ${appliedCount} 对规则`, 'success');
+						state.pendingChanges.clear();
 						state.selectedPairIds.clear();
 						state.lastSelectedIndex = null;
 						await loadData();
@@ -1011,16 +596,11 @@
 						setStatus('应用规则失败', 'error');
 					}
 				} catch (error) {
-					setStatus('应用规则失败', 'error');
-				} finally {
-					setLoading(false);
-				}
+					console.error('applyRules error:', error);
+					setStatus('应用规则失败: ' + (error.message || error), 'error');
+				} finally { setLoading(false); }
 			}
-
-			if (elements.versionLink) {
-				elements.versionLink.textContent = `v${APP_VERSION}`;
-			}
-
+			if (elements.versionLink) elements.versionLink.textContent = `v${APP_VERSION}`;
 			initTheme();
 			bindEvents();
 			loadData();
