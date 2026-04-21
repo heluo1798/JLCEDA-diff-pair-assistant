@@ -122,36 +122,39 @@
 			button.primary { background: var(--primary); color: var(--primary-contrast); box-shadow: 0 6px 12px rgba(37, 99, 235, 0.22); }
 			button.danger { background: var(--danger); color: #fff; box-shadow: 0 6px 12px rgba(239, 68, 68, 0.22); }
 			button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-			.section { background: var(--card); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px; }
-			.filter-bar { display: flex; gap: 12px; align-items: center; }
-			.filter-input { flex: 1; height: 36px; border-radius: 10px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; font-weight: 600; background: var(--card); color: var(--text); }
+			.section { background: var(--card); border-radius: 10px; padding: 8px 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px; }
+			.filter-bar { display: flex; gap: 8px; align-items: center; }
+			.filter-input { flex: 1; height: 30px; border-radius: 8px; border: 1px solid var(--border); padding: 0 10px; font-size: 12px; font-weight: 600; background: var(--card); color: var(--text); }
 			.filter-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12); }
-			.filter-select { height: 36px; border-radius: 10px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; font-weight: 600; background: var(--card); color: var(--text); min-width: 150px; }
-			.results { display: flex; flex-direction: column; gap: 12px; flex: 1; min-height: 0; }
+			.filter-select { height: 30px; border-radius: 8px; border: 1px solid var(--border); padding: 0 10px; font-size: 12px; font-weight: 600; background: var(--card); color: var(--text); min-width: 130px; }
+			.results { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; }
 			.result-list { flex: 1; min-height: 0; overflow: auto; padding-right: 4px; }
-			.table { width: 100%; border-collapse: collapse; font-size: 13px; }
-			.table thead th { text-align: left; padding: 10px 8px; background: var(--table-head); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
-			.table tbody td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+			.table { width: 100%; border-collapse: collapse; font-size: 12px; }
+			.table thead th { text-align: left; padding: 6px 6px; background: var(--table-head); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 2; }
+			.table tbody td { padding: 5px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 			.table tbody tr:hover { background: var(--table-hover); }
 			.table tbody tr.selected { background: var(--selected-bg); }
 			.cell-name { font-weight: 600; }
 			.cell-muted { color: var(--muted); }
-			.rule-select { height: 32px; border-radius: 8px; border: 1px solid var(--border); padding: 0 8px; font-size: 13px; font-weight: 600; background: var(--card); color: var(--text); width: 100%; min-width: 120px; }
-			.footer { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 14px; padding: 12px 16px; box-shadow: var(--shadow); gap: 16px; }
-			.status { color: var(--muted); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+			.rule-select { height: 28px; border-radius: 6px; border: 1px solid var(--border); padding: 0 6px; font-size: 12px; font-weight: 600; background: var(--card); color: var(--text); width: 100%; min-width: 100px; }
+			.delete-btn { width: 22px; height: 22px; border-radius: 6px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--muted); font-size: 14px; opacity: 0; transition: all 0.15s ease; }
+			.table tbody tr:hover .delete-btn { opacity: 1; }
+			.delete-btn:hover { background: var(--danger); color: #fff; }
+			.footer { display: flex; align-items: center; justify-content: space-between; background: var(--card); border-radius: 10px; padding: 8px 14px; box-shadow: var(--shadow); gap: 12px; }
+			.status { color: var(--muted); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
 			.status-error { color: var(--danger); }
 			.status-warning { color: var(--warning); }
 			.status-info { color: var(--primary); }
 			.status-success { color: var(--success); }
-			.actions { display: flex; align-items: center; gap: 12px; }
-			.batch-select { height: 36px; border-radius: 10px; border: 1px solid var(--border); padding: 0 12px; font-size: 14px; font-weight: 600; background: var(--card); color: var(--text); min-width: 180px; }
+			.actions { display: flex; align-items: center; gap: 8px; }
+			.batch-select { height: 30px; border-radius: 8px; border: 1px solid var(--border); padding: 0 10px; font-size: 12px; font-weight: 600; background: var(--card); color: var(--text); min-width: 150px; }
 			.loading { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.2); backdrop-filter: blur(6px); z-index: 999; }
 			.loading.active { display: flex; }
-			.loading-card { background: var(--card); padding: 22px 26px; border-radius: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+			.loading-card { background: var(--card); padding: 18px 22px; border-radius: 10px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 10px; }
 			#loadingText { text-align: center; white-space: pre-line; }
 			.spinner { width: 36px; height: 36px; border-radius: 999px; border: 4px solid var(--border); border-top-color: var(--primary); animation: spin 0.9s linear infinite; }
 			.icon-button { width: 26px; height: 26px; border-radius: 999px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--tag); color: var(--text); font-size: 14px; }
-			.hint { font-size: 12px; color: var(--muted); font-weight: 600; }
+			.hint { font-size: 11px; color: var(--muted); font-weight: 600; }
 			@keyframes spin { to { transform: rotate(360deg); } }
 		</style>
 	</head>
@@ -190,6 +193,7 @@
 								<th>正网络</th>
 								<th>负网络</th>
 								<th style="width: 200px">当前规则</th>
+									<th style="width: 36px"></th>
 							</tr>
 						</thead>
 						<tbody id="tableBody"></tbody>
@@ -205,6 +209,7 @@
 						<option value="">选择规则</option>
 					</select>
 					<button class="primary" id="applyBtn" disabled>应用修改</button>
+					<button class="danger" id="deleteSelectedBtn" disabled>删除选中</button>
 					<button id="clearSelectionBtn">取消选择</button>
 				</div>
 			</footer>
