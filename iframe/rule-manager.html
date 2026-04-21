@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-Hans">
 	<head>
-		<title>差分对规则管理</title>
+		<title>差分对管理</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<style>
@@ -137,6 +137,9 @@
 			.cell-name { font-weight: 600; }
 			.cell-muted { color: var(--muted); }
 			.rule-select { height: 28px; border-radius: 6px; border: 1px solid var(--border); padding: 0 6px; font-size: 12px; font-weight: 600; background: var(--card); color: var(--text); width: 100%; min-width: 100px; }
+			.name-input { border: 1px solid transparent; background: transparent; font-size: 12px; font-weight: 600; color: var(--text); width: 100%; padding: 2px 4px; border-radius: 4px; font-family: inherit; }
+			.name-input:hover { border-color: var(--border); background: var(--card); }
+			.name-input:focus { outline: none; border-color: var(--primary); background: var(--card); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12); }
 			.delete-btn { width: 22px; height: 22px; border-radius: 6px; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: var(--muted); font-size: 14px; opacity: 0; transition: all 0.15s ease; }
 			.table tbody tr:hover .delete-btn { opacity: 1; }
 			.delete-btn:hover { background: var(--danger); color: #fff; }
@@ -167,7 +170,7 @@
 						<div class="window-dot minimize" data-action="minimize"></div>
 						<div class="window-dot maximize" data-action="maximize"></div>
 					</div>
-					<div class="title">差分对规则管理</div>
+					<div class="title">差分对管理</div>
 					<button class="theme-toggle" id="themeToggle">浅色</button>
 				</div>
 				<div class="titlebar-right">
@@ -199,7 +202,7 @@
 						<tbody id="tableBody"></tbody>
 					</table>
 				</div>
-				<div class="hint">提示: Shift+点击可范围选择，Ctrl+点击可多选非连续行，×按钮可标记删除单行</div>
+				<div class="hint">提示: Shift+点击可范围选择，Ctrl+点击可多选非连续行，点击名称可修改，×按钮可标记删除单行</div>
 			</section>
 			<footer class="footer">
 				<div class="status status-info" id="statusText">等待加载</div>
@@ -221,7 +224,7 @@
 			</div>
 		</div>
 		<script>
-			const APP_VERSION = '26.4.6';
+			const APP_VERSION = '26.4.7';
 			const THEME_KEY = 'diffPairRuleManagerTheme';
 			const DIFF_PAIR_RULE_TYPE = 'Differential Pair';
 			const state = {
@@ -230,6 +233,7 @@
 				defaultRuleName: null,
 				pairBindings: new Map(),
 				pendingChanges: new Map(),
+				pendingNameChanges: new Map(),
 				pendingDeletions: new Set(),
 				selectedPairIds: new Set(),
 				lastSelectedIndex: null,
@@ -371,6 +375,7 @@
 						}
 					});
 					state.pendingChanges.clear();
+					state.pendingNameChanges.clear();
 					state.pendingDeletions.clear();
 					renderRuleFilter();
 					renderBatchRuleSelect();
@@ -426,7 +431,13 @@
 					checkboxCell.appendChild(checkbox);
 					const nameCell = document.createElement('td');
 					nameCell.className = 'cell-name';
-					nameCell.textContent = pair.name;
+					const nameInput = document.createElement('input');
+					nameInput.type = 'text';
+					nameInput.className = 'name-input';
+					nameInput.value = state.pendingNameChanges.get(pair.name) || pair.name;
+					nameInput.dataset.pairName = pair.name;
+					nameInput.title = '点击修改差分对名';
+					nameCell.appendChild(nameInput);
 					const positiveCell = document.createElement('td');
 					positiveCell.textContent = pair.positiveNet;
 					const negativeCell = document.createElement('td');
@@ -452,6 +463,11 @@
 					if (pendingRule !== undefined && pendingRule !== currentBinding) {
 						row.style.borderLeft = '3px solid var(--warning)';
 						ruleSelect.style.fontWeight = '800';
+					}
+					const pendingName = state.pendingNameChanges.get(pair.name);
+					if (pendingName !== undefined && pendingName !== pair.name) {
+						row.style.borderLeft = '3px solid var(--warning)';
+						nameInput.style.fontWeight = '800';
 					}
 					const deleteCell = document.createElement('td');
 					const deleteBtn = document.createElement('button');
@@ -482,10 +498,10 @@
 			}
 			function updateBatchActions() {
 				const count = state.selectedPairIds.size;
-				const hasPending = state.pendingChanges.size > 0 || state.pendingDeletions.size > 0;
-				elements.selectedCount.textContent = `已选 ${count} 对${hasPending ? `，${state.pendingChanges.size} 条待修改，${state.pendingDeletions.size} 条待删除` : ''}`;
+				const hasPending = state.pendingChanges.size > 0 || state.pendingNameChanges.size > 0 || state.pendingDeletions.size > 0;
+				elements.selectedCount.textContent = `已选 ${count} 对${hasPending ? `，${state.pendingChanges.size} 条待改规则，${state.pendingNameChanges.size} 条待改名，${state.pendingDeletions.size} 条待删除` : ''}`;
 				elements.batchRuleSelect.disabled = count === 0;
-				elements.applyBtn.disabled = state.pendingChanges.size === 0 && state.pendingDeletions.size === 0;
+				elements.applyBtn.disabled = state.pendingChanges.size === 0 && state.pendingNameChanges.size === 0 && state.pendingDeletions.size === 0;
 				elements.deleteSelectedBtn.disabled = count === 0;
 			}
 			function toggleSelection(pairName, index, shiftKey, ctrlKey) {
@@ -547,6 +563,20 @@
 							state.pendingChanges.set(pairName, ruleName);
 						}
 						renderTable();
+						updateBatchActions();
+					}
+				});
+				elements.tableBody.addEventListener('input', (e) => {
+					if (e.target.classList.contains('name-input')) {
+						const pairName = e.target.dataset.pairName;
+						const newName = e.target.value.trim();
+						const originalPair = state.pairs.find(p => p.name === pairName);
+						const originalName = originalPair ? originalPair.name : pairName;
+						if (newName && newName !== originalName) {
+							state.pendingNameChanges.set(pairName, newName);
+						} else {
+							state.pendingNameChanges.delete(pairName);
+						}
 						updateBatchActions();
 					}
 				});
@@ -619,13 +649,14 @@
 			async function applyRules() {
 				const eda = getEda();
 				if (!eda) { setStatus('未检测到 EDA 环境', 'error'); return; }
-				if (state.pendingChanges.size === 0 && state.pendingDeletions.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
+				if (state.pendingChanges.size === 0 && state.pendingNameChanges.size === 0 && state.pendingDeletions.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
 				setLoading(true, '正在应用规则');
 				try {
 					// 获取 PCB 源文件 NDJSON（仅用于规则修改）
 					let sourceText = await eda.sys_FileManager.getDocumentSource();
 					const lines = sourceText.split('\n');
 					let appliedCount = 0;
+					let renamedCount = 0;
 					let deletedCount = 0;
 
 					// 应用规则修改
@@ -655,6 +686,14 @@
 						}
 					}
 
+					// 应用差分对改名（调用 API）
+					if (state.pendingNameChanges.size > 0) {
+						for (const [oldName, newName] of state.pendingNameChanges) {
+							const ok = await eda.pcb_Drc.modifyDifferentialPairName(oldName, newName);
+							if (ok) renamedCount++;
+						}
+					}
+
 					// 删除标记的差分对（调用 API）
 					if (state.pendingDeletions.size > 0) {
 						for (const pairName of state.pendingDeletions) {
@@ -669,12 +708,14 @@
 					}
 					await eda.pcb_Document.save();
 
-					const totalChanged = appliedCount + deletedCount;
+					const totalChanged = appliedCount + renamedCount + deletedCount;
 					if (totalChanged > 0) {
 						let msg = `成功应用 ${appliedCount} 对规则`;
+						if (renamedCount > 0) msg += `，重命名 ${renamedCount} 对`;
 						if (deletedCount > 0) msg += `，删除 ${deletedCount} 对`;
 						setStatus(msg, 'success');
 						state.pendingChanges.clear();
+						state.pendingNameChanges.clear();
 						state.pendingDeletions.clear();
 						state.selectedPairIds.clear();
 						state.lastSelectedIndex = null;

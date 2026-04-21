@@ -1,9 +1,9 @@
 {
 	"name": "diff-pair-assistant",
 	"uuid": "3f48035397a64fb8a96d88da3c3ae48c",
-	"displayName": "差分对雷达",
+	"displayName": "差分对管理",
 	"description": "极速识别 PCB 差分对并一键写入",
-	"version": "26.4.6",
+	"version": "26.4.7",
 	"publisher": "Ocean",
 	"engines": {
 		"eda": "^2.3.0"
@@ -27,7 +27,7 @@
 		"pcb": [
 			{
 				"id": "DiffPairAssistant",
-				"title": "差分对雷达",
+				"title": "差分对管理",
 				"menuItems": [
 					{
 						"id": "OpenAssistant",
