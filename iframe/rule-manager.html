@@ -477,8 +477,8 @@
 					deleteBtn.title = '删除此差分对';
 					deleteCell.appendChild(deleteBtn);
 					if (state.pendingDeletions.has(pair.name)) {
-						nameCell.style.textDecoration = 'line-through';
-						nameCell.style.opacity = '0.5';
+						nameInput.style.textDecoration = 'line-through';
+						nameInput.style.opacity = '0.5';
 					}
 					ruleCell.appendChild(ruleSelect);
 					row.appendChild(checkboxCell);
@@ -530,7 +530,7 @@
 					updateBatchActions();
 				});
 				elements.tableBody.addEventListener('click', (e) => {
-					if (e.target.closest('select') || e.target.closest('option')) return;
+					if (e.target.closest('select') || e.target.closest('option') || e.target.closest('.name-input')) return;
 					const deleteBtn = e.target.closest('.delete-btn');
 					if (deleteBtn) {
 						const pairName = deleteBtn.dataset.pairName;
@@ -652,15 +652,22 @@
 				if (state.pendingChanges.size === 0 && state.pendingNameChanges.size === 0 && state.pendingDeletions.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
 				setLoading(true, '正在应用规则');
 				try {
-					// 获取 PCB 源文件 NDJSON（仅用于规则修改）
-					let sourceText = await eda.sys_FileManager.getDocumentSource();
-					const lines = sourceText.split('\n');
 					let appliedCount = 0;
 					let renamedCount = 0;
 					let deletedCount = 0;
 
-					// 应用规则修改
+					// 1. 先改名（API 可能触发内部状态变更）
+					if (state.pendingNameChanges.size > 0) {
+						for (const [oldName, newName] of state.pendingNameChanges) {
+							const ok = await eda.pcb_Drc.modifyDifferentialPairName(oldName, newName);
+							if (ok) renamedCount++;
+						}
+					}
+
+					// 2. 再改规则（NDJSON 写回，使用最新状态）
 					if (state.pendingChanges.size > 0) {
+						let sourceText = await eda.sys_FileManager.getDocumentSource();
+						const lines = sourceText.split('\n');
 						for (const [pairName, targetRuleName] of state.pendingChanges) {
 							for (let i = 0; i < lines.length; i++) {
 								if (!lines[i].includes('RULE_SELECTOR') || !lines[i].includes('DIFF_PAIR')) continue;
@@ -684,17 +691,10 @@
 								} catch { /* skip */ }
 							}
 						}
+						await eda.sys_FileManager.setDocumentSource(lines.join('\n'));
 					}
 
-					// 应用差分对改名（调用 API）
-					if (state.pendingNameChanges.size > 0) {
-						for (const [oldName, newName] of state.pendingNameChanges) {
-							const ok = await eda.pcb_Drc.modifyDifferentialPairName(oldName, newName);
-							if (ok) renamedCount++;
-						}
-					}
-
-					// 删除标记的差分对（调用 API）
+					// 3. 最后删除（API）
 					if (state.pendingDeletions.size > 0) {
 						for (const pairName of state.pendingDeletions) {
 							const ok = await eda.pcb_Drc.deleteDifferentialPair(pairName);
@@ -702,10 +702,7 @@
 						}
 					}
 
-					// 写回修改后的规则并保存
-					if (state.pendingChanges.size > 0) {
-						await eda.sys_FileManager.setDocumentSource(lines.join('\n'));
-					}
+					// 保存
 					await eda.pcb_Document.save();
 
 					const totalChanged = appliedCount + renamedCount + deletedCount;
