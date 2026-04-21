@@ -199,7 +199,7 @@
 						<tbody id="tableBody"></tbody>
 					</table>
 				</div>
-				<div class="hint">提示: Shift+点击可范围选择，Ctrl+点击可多选非连续行</div>
+				<div class="hint">提示: Shift+点击可范围选择，Ctrl+点击可多选非连续行，×按钮可标记删除单行</div>
 			</section>
 			<footer class="footer">
 				<div class="status status-info" id="statusText">等待加载</div>
@@ -230,6 +230,7 @@
 				defaultRuleName: null,
 				pairBindings: new Map(),
 				pendingChanges: new Map(),
+				pendingDeletions: new Set(),
 				selectedPairIds: new Set(),
 				lastSelectedIndex: null,
 				filterText: '',
@@ -245,6 +246,7 @@
 				selectedCount: document.getElementById('selectedCount'),
 				batchRuleSelect: document.getElementById('batchRuleSelect'),
 				applyBtn: document.getElementById('applyBtn'),
+				deleteSelectedBtn: document.getElementById('deleteSelectedBtn'),
 				clearSelectionBtn: document.getElementById('clearSelectionBtn'),
 				loading: document.getElementById('loading'),
 				loadingText: document.getElementById('loadingText'),
@@ -369,6 +371,7 @@
 						}
 					});
 					state.pendingChanges.clear();
+					state.pendingDeletions.clear();
 					renderRuleFilter();
 					renderBatchRuleSelect();
 					renderTable();
@@ -450,12 +453,24 @@
 						row.style.borderLeft = '3px solid var(--warning)';
 						ruleSelect.style.fontWeight = '800';
 					}
+					const deleteCell = document.createElement('td');
+					const deleteBtn = document.createElement('button');
+					deleteBtn.className = 'delete-btn';
+					deleteBtn.textContent = '×';
+					deleteBtn.dataset.pairName = pair.name;
+					deleteBtn.title = '删除此差分对';
+					deleteCell.appendChild(deleteBtn);
+					if (state.pendingDeletions.has(pair.name)) {
+						nameCell.style.textDecoration = 'line-through';
+						nameCell.style.opacity = '0.5';
+					}
 					ruleCell.appendChild(ruleSelect);
 					row.appendChild(checkboxCell);
 					row.appendChild(nameCell);
 					row.appendChild(positiveCell);
 					row.appendChild(negativeCell);
 					row.appendChild(ruleCell);
+					row.appendChild(deleteCell);
 					elements.tableBody.appendChild(row);
 				});
 			}
@@ -467,10 +482,11 @@
 			}
 			function updateBatchActions() {
 				const count = state.selectedPairIds.size;
-				const hasPending = state.pendingChanges.size > 0;
-				elements.selectedCount.textContent = `已选 ${count} 对${hasPending ? `，${state.pendingChanges.size} 对待应用` : ''}`;
+				const hasPending = state.pendingChanges.size > 0 || state.pendingDeletions.size > 0;
+				elements.selectedCount.textContent = `已选 ${count} 对${hasPending ? `，${state.pendingChanges.size} 条待修改，${state.pendingDeletions.size} 条待删除` : ''}`;
 				elements.batchRuleSelect.disabled = count === 0;
-				elements.applyBtn.disabled = state.pendingChanges.size === 0;
+				elements.applyBtn.disabled = state.pendingChanges.size === 0 && state.pendingDeletions.size === 0;
+				elements.deleteSelectedBtn.disabled = count === 0;
 			}
 			function toggleSelection(pairName, index, shiftKey, ctrlKey) {
 				const filtered = getFilteredPairs();
@@ -499,6 +515,19 @@
 				});
 				elements.tableBody.addEventListener('click', (e) => {
 					if (e.target.closest('select') || e.target.closest('option')) return;
+					const deleteBtn = e.target.closest('.delete-btn');
+					if (deleteBtn) {
+						const pairName = deleteBtn.dataset.pairName;
+						if (state.pendingDeletions.has(pairName)) {
+							state.pendingDeletions.delete(pairName);
+						} else {
+							state.pendingDeletions.add(pairName);
+							state.pendingChanges.delete(pairName);
+						}
+						renderTable();
+						updateBatchActions();
+						return;
+					}
 					const checkbox = e.target.closest('input[type="checkbox"]');
 					if (checkbox) {
 						toggleSelection(checkbox.dataset.pairName, parseInt(checkbox.dataset.index, 10), e.shiftKey, e.ctrlKey || e.metaKey);
@@ -545,6 +574,7 @@
 					updateBatchActions();
 				});
 				elements.applyBtn.addEventListener('click', async () => applyRules());
+					elements.deleteSelectedBtn.addEventListener('click', () => deleteSelectedPairs());
 				elements.clearSelectionBtn.addEventListener('click', () => {
 					state.selectedPairIds.clear();
 					state.lastSelectedIndex = null;
@@ -568,48 +598,84 @@
 					});
 				});
 			}
+			function deleteSelectedPairs() {
+				if (state.selectedPairIds.size === 0) return;
+				let addCount = 0;
+				state.selectedPairIds.forEach((pairName) => {
+					if (!state.pendingDeletions.has(pairName)) {
+						state.pendingDeletions.add(pairName);
+						state.pendingChanges.delete(pairName);
+						addCount++;
+					}
+				});
+				if (addCount > 0) {
+					state.selectedPairIds.clear();
+					state.lastSelectedIndex = null;
+					renderTable();
+					updateBatchActions();
+					setStatus(`${addCount} 对标记待删除`, 'warning');
+				}
+			}
 			async function applyRules() {
 				const eda = getEda();
 				if (!eda) { setStatus('未检测到 EDA 环境', 'error'); return; }
-				if (state.pendingChanges.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
+				if (state.pendingChanges.size === 0 && state.pendingDeletions.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
 				setLoading(true, '正在应用规则');
 				try {
-					// 获取 PCB 源文件 NDJSON
+					// 获取 PCB 源文件 NDJSON（仅用于规则修改）
 					let sourceText = await eda.sys_FileManager.getDocumentSource();
 					const lines = sourceText.split('\n');
 					let appliedCount = 0;
+					let deletedCount = 0;
 
-					for (const [pairName, targetRuleName] of state.pendingChanges) {
-						for (let i = 0; i < lines.length; i++) {
-							if (!lines[i].includes('RULE_SELECTOR') || !lines[i].includes('DIFF_PAIR')) continue;
-							const sepIdx = lines[i].indexOf('||');
-							if (sepIdx < 0) continue;
-							try {
-								const outer = JSON.parse(lines[i].slice(0, sepIdx));
-								const idObj = JSON.parse(outer.id);
-								if (idObj && idObj[1] && idObj[1][0] === 'DIFF_PAIR' && idObj[1][1] === pairName) {
-									const innerRaw = lines[i].slice(sepIdx + 2).replace(/\|$/, '');
-									const inner = JSON.parse(innerRaw);
-									if (targetRuleName) {
-										inner.ruleKeyValue = { ...inner.ruleKeyValue, DIFFER_ENTAIL: targetRuleName };
-									} else {
-										inner.ruleKeyValue = {};
+					// 应用规则修改
+					if (state.pendingChanges.size > 0) {
+						for (const [pairName, targetRuleName] of state.pendingChanges) {
+							for (let i = 0; i < lines.length; i++) {
+								if (!lines[i].includes('RULE_SELECTOR') || !lines[i].includes('DIFF_PAIR')) continue;
+								const sepIdx = lines[i].indexOf('||');
+								if (sepIdx < 0) continue;
+								try {
+									const outer = JSON.parse(lines[i].slice(0, sepIdx));
+									const idObj = JSON.parse(outer.id);
+									if (idObj && idObj[1] && idObj[1][0] === 'DIFF_PAIR' && idObj[1][1] === pairName) {
+										const innerRaw = lines[i].slice(sepIdx + 2).replace(/\|$/, '');
+										const inner = JSON.parse(innerRaw);
+										if (targetRuleName) {
+											inner.ruleKeyValue = { ...inner.ruleKeyValue, DIFFER_ENTAIL: targetRuleName };
+										} else {
+											inner.ruleKeyValue = {};
+										}
+										lines[i] = lines[i].slice(0, sepIdx) + '||' + JSON.stringify(inner) + '|';
+										appliedCount++;
+										break;
 									}
-									lines[i] = lines[i].slice(0, sepIdx) + '||' + JSON.stringify(inner) + '|';
-									appliedCount++;
-									break;
-								}
-							} catch { /* skip */ }
+								} catch { /* skip */ }
+							}
 						}
 					}
 
-					// 写回并保存
-					await eda.sys_FileManager.setDocumentSource(lines.join('\n'));
+					// 删除标记的差分对（调用 API）
+					if (state.pendingDeletions.size > 0) {
+						for (const pairName of state.pendingDeletions) {
+							const ok = await eda.pcb_Drc.deleteDifferentialPair(pairName);
+							if (ok) deletedCount++;
+						}
+					}
+
+					// 写回修改后的规则并保存
+					if (state.pendingChanges.size > 0) {
+						await eda.sys_FileManager.setDocumentSource(lines.join('\n'));
+					}
 					await eda.pcb_Document.save();
 
-					if (appliedCount > 0) {
-						setStatus(`成功应用 ${appliedCount} 对规则`, 'success');
+					const totalChanged = appliedCount + deletedCount;
+					if (totalChanged > 0) {
+						let msg = `成功应用 ${appliedCount} 对规则`;
+						if (deletedCount > 0) msg += `，删除 ${deletedCount} 对`;
+						setStatus(msg, 'success');
 						state.pendingChanges.clear();
+						state.pendingDeletions.clear();
 						state.selectedPairIds.clear();
 						state.lastSelectedIndex = null;
 						await loadData();
