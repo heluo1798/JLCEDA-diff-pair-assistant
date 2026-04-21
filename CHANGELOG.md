@@ -1,3 +1,11 @@
+# 26.4.6
+
+## 修复
+
+1. 规则管理器数据加载：改为从 getDocumentSource() NDJSON 解析差分对规则绑定
+2. 规则管理器默认规则检测：增加 isSetDefault === true 判断
+3. 规则管理器写回机制：改用 setDocumentSource() + pcb_Document.save() 持久化
+
 # 26.1.18
 
 ## 修复

@@ -215,14 +215,13 @@
 			</div>
 		</div>
 		<script>
-			const APP_VERSION = '26.4.5';
+			const APP_VERSION = '26.4.6';
 			const THEME_KEY = 'diffPairRuleManagerTheme';
 			const DIFF_PAIR_RULE_TYPE = 'Differential Pair';
 			const state = {
 				pairs: [],
 				rules: [],
 				defaultRuleName: null,
-				regionRules: [],
 				pairBindings: new Map(),
 				pendingChanges: new Map(),
 				selectedPairIds: new Set(),
@@ -308,7 +307,7 @@
 					Object.keys(diffPairRules).forEach((ruleName) => {
 						const ruleObj = diffPairRules[ruleName];
 						if (ruleObj && typeof ruleObj === 'object') {
-							const isDefault = ruleObj.ruleState === 1;
+							const isDefault = ruleObj.ruleState === 1 || ruleObj.isSetDefault === true;
 							if (isDefault) defaultRuleName = ruleName;
 							rules.push({ name: ruleName, context: ruleObj.ruleContext || ruleObj.form || {}, isDefault });
 						}
@@ -316,19 +315,28 @@
 				}
 				return { rules, defaultRuleName };
 			}
-			function parseRegionRules(regionRules) {
+			function parsePairBindingsFromSource(sourceText) {
 				const bindings = new Map();
-				if (!Array.isArray(regionRules)) return bindings;
-				regionRules.forEach((rule) => {
-					if (rule.ruleSelect && Array.isArray(rule.ruleSelect)) {
-						const selectorType = rule.ruleSelect[0];
-						const selectorValue = rule.ruleSelect[1];
-						if (selectorType === 'DIFF_PAIR' && selectorValue) {
-							const ruleName = rule.ruleKeyValue ? rule.ruleKeyValue[DIFF_PAIR_RULE_TYPE] : null;
-							bindings.set(selectorValue, ruleName);
+				if (!sourceText || typeof sourceText !== 'string') return bindings;
+				const lines = sourceText.split('\n');
+				for (const line of lines) {
+					if (!line.includes('RULE_SELECTOR') || !line.includes('DIFF_PAIR')) continue;
+					try {
+						const sepIdx = line.indexOf('||');
+						if (sepIdx < 0) continue;
+						const outer = JSON.parse(line.slice(0, sepIdx));
+						const innerRaw = line.slice(sepIdx + 2).replace(/\|$/, '');
+						const inner = JSON.parse(innerRaw);
+						const idObj = JSON.parse(outer.id);
+						// id format: ["RULE_SELECTOR", ["DIFF_PAIR", "pairName"]]
+						if (idObj && idObj[1] && idObj[1][0] === 'DIFF_PAIR') {
+							const pairName = idObj[1][1];
+							const ruleName = inner.ruleKeyValue?.DIFFER_ENTAIL || null;
+							// null means using default rule
+							bindings.set(pairName, ruleName);
 						}
-					}
-				});
+					} catch { /* skip malformed lines */ }
+				}
 				return bindings;
 			}
 			function formatRuleName(ruleName, isDefault) {
@@ -345,12 +353,13 @@
 					const parsed = parseRuleConfig(ruleConfig);
 					state.rules = parsed.rules;
 					state.defaultRuleName = parsed.defaultRuleName;
-					const regionRules = await eda.pcb_Drc.getRegionRules();
-					state.regionRules = regionRules || [];
-					state.pairBindings = parseRegionRules(state.regionRules);
+					// 从 PCB 源文件 NDJSON 中解析 RULE_SELECTOR 绑定关系
+					const sourceText = await eda.sys_FileManager.getDocumentSource();
+					state.pairBindings = parsePairBindingsFromSource(sourceText);
+					// 确保所有差分对都有绑定值（null 表示使用默认规则）
 					state.pairs.forEach((pair) => {
 						if (!state.pairBindings.has(pair.name)) {
-							state.pairBindings.set(pair.name, state.defaultRuleName);
+							state.pairBindings.set(pair.name, null);
 						}
 					});
 					state.pendingChanges.clear();
@@ -559,41 +568,47 @@
 				if (state.pendingChanges.size === 0) { setStatus('没有待应用的修改', 'warning'); return; }
 				setLoading(true, '正在应用规则');
 				try {
-					let regionRules = await eda.pcb_Drc.getRegionRules();
-					if (!Array.isArray(regionRules)) regionRules = [];
-					const existingPairRules = new Map();
-					regionRules.forEach((rule, index) => {
-						if (rule.ruleSelect && Array.isArray(rule.ruleSelect) && rule.ruleSelect[0] === 'DIFF_PAIR') {
-							existingPairRules.set(rule.ruleSelect[1], index);
-						}
-					});
+					// 获取 PCB 源文件 NDJSON
+					let sourceText = await eda.sys_FileManager.getDocumentSource();
+					const lines = sourceText.split('\n');
 					let appliedCount = 0;
+
 					for (const [pairName, targetRuleName] of state.pendingChanges) {
-						const pair = state.pairs.find((p) => p.name === pairName);
-						if (!pair) continue;
-						const existingIndex = existingPairRules.get(pairName);
-						if (existingIndex !== undefined) {
-							const existingRule = regionRules[existingIndex];
-							existingRule.ruleKeyValue = { ...existingRule.ruleKeyValue, [DIFF_PAIR_RULE_TYPE]: targetRuleName };
-						} else {
-							const newRule = {
-								ruleSelect: ['DIFF_PAIR', pairName],
-								ruleOrder: 4,
-								ruleKeyValue: { [DIFF_PAIR_RULE_TYPE]: targetRuleName },
-							};
-							regionRules.push(newRule);
+						for (let i = 0; i < lines.length; i++) {
+							if (!lines[i].includes('RULE_SELECTOR') || !lines[i].includes('DIFF_PAIR')) continue;
+							const sepIdx = lines[i].indexOf('||');
+							if (sepIdx < 0) continue;
+							try {
+								const outer = JSON.parse(lines[i].slice(0, sepIdx));
+								const idObj = JSON.parse(outer.id);
+								if (idObj && idObj[1] && idObj[1][0] === 'DIFF_PAIR' && idObj[1][1] === pairName) {
+									const innerRaw = lines[i].slice(sepIdx + 2).replace(/\|$/, '');
+									const inner = JSON.parse(innerRaw);
+									if (targetRuleName) {
+										inner.ruleKeyValue = { ...inner.ruleKeyValue, DIFFER_ENTAIL: targetRuleName };
+									} else {
+										inner.ruleKeyValue = {};
+									}
+									lines[i] = lines[i].slice(0, sepIdx) + '||' + JSON.stringify(inner) + '|';
+									appliedCount++;
+									break;
+								}
+							} catch { /* skip */ }
 						}
-						appliedCount++;
 					}
-					const success = await eda.pcb_Drc.overwriteRegionRules(regionRules);
-					if (success) {
+
+					// 写回并保存
+					await eda.sys_FileManager.setDocumentSource(lines.join('\n'));
+					await eda.pcb_Document.save();
+
+					if (appliedCount > 0) {
 						setStatus(`成功应用 ${appliedCount} 对规则`, 'success');
 						state.pendingChanges.clear();
 						state.selectedPairIds.clear();
 						state.lastSelectedIndex = null;
 						await loadData();
 					} else {
-						setStatus('应用规则失败', 'error');
+						setStatus('应用规则失败：未找到对应的 RULE_SELECTOR', 'error');
 					}
 				} catch (error) {
 					console.error('applyRules error:', error);
