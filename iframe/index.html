@@ -750,7 +750,7 @@
 		</div>
 
 		<script>
-			const APP_VERSION = '26.1.18';
+			const APP_VERSION = '26.4.9';
 			const STORAGE_KEY = 'diffPairRules';
 			const THEME_KEY = 'diffPairTheme';
 			const DEFAULT_RULES = [
@@ -1037,6 +1037,12 @@
 					}
 					if (lowerNet.startsWith(lowerSuffix)) {
 						const base = net.slice(suffix.length);
+						return { base, baseKey: base.toLowerCase() };
+					}
+					// 支持中间位置匹配
+					const index = lowerNet.indexOf(lowerSuffix);
+					if (index >= 0) {
+						const base = net.slice(0, index) + net.slice(index + suffix.length);
 						return { base, baseKey: base.toLowerCase() };
 					}
 					return null;
@@ -1743,7 +1749,7 @@
 						return;
 					}
 					if (!hasRule(rule)) {
-						state.customRules.push({ ...rule, custom: true });
+						state.customRules.push({ ...rule, custom: true, key: buildCustomRuleKey(rule.a, rule.b), priority: 1000 });
 						saveCustomRules();
 						refreshRules();
 						scanPairs();
