@@ -18,8 +18,8 @@
 	"images": {
 		"logo": "./images/logo.png"
 	},
-	"homepage": "https://github.com/heluo1798/JLCEDA-diff-pair-assistant",
-	"bugs": "https://github.com/heluo1798/JLCEDA-diff-pair-assistant/issues",
+	"homepage": "https://github.com/ocean1798/JLCEDA-diff-pair-assistant",
+	"bugs": "https://github.com/ocean1798/JLCEDA-diff-pair-assistant/issues",
 	"activationEvents": {},
 	"entry": "./dist/index",
 	"dependentExtensions": {},
